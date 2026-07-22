@@ -60,6 +60,26 @@ public sealed class QueryBuilderTests
     }
 
     [Fact]
+    public void Build_NoArtistWithGenre_AddsGenreHint()
+    {
+        var track = new TrackInfo { SourcePath = "x.mp3", Artist = "", Title = "Hurricane", Genre = "Metal/Hard Rock" };
+
+        var queries = QueryBuilder.Build(track);
+
+        Assert.Contains("Hurricane Metal", queries); // primary genre only
+    }
+
+    [Fact]
+    public void Build_ArtistPresent_NoGenreHint()
+    {
+        var track = new TrackInfo { SourcePath = "x.mp3", Artist = "Queen", Title = "Hurricane", Genre = "Rock" };
+
+        var queries = QueryBuilder.Build(track);
+
+        Assert.DoesNotContain(queries, q => q.Contains("Rock"));
+    }
+
+    [Fact]
     public void Build_LatinOnly_NoTransliteratedDuplicates()
     {
         var queries = QueryBuilder.Build(Track("Queen", "Bohemian Rhapsody"));

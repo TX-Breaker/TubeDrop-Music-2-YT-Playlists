@@ -48,6 +48,17 @@ public static class QueryBuilder
 
         Add(title);
 
+        // No artist to anchor a generic title (e.g. "Hurricane") → add the genre as
+        // a hint so YouTube surfaces the right style; duration then disambiguates.
+        if (artist.Length == 0 && track.Genre.Length > 0)
+        {
+            var genre = FilenameHeuristics.CleanNoise(PrimaryGenre(track.Genre));
+            if (genre.Length > 0)
+            {
+                Add($"{title} {genre}");
+            }
+        }
+
         // Transliterated variants only when they differ (non-Latin scripts).
         if (nonLatin)
         {
@@ -63,4 +74,8 @@ public static class QueryBuilder
 
         return queries;
     }
+
+    /// <summary>First genre of a compound tag like "Metal/Hard Rock" or "Rock; Alternative".</summary>
+    private static string PrimaryGenre(string genre) =>
+        genre.Split('/', ';', ',')[0].Trim();
 }
