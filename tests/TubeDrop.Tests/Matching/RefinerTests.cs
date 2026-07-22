@@ -58,6 +58,16 @@ public sealed class DeterministicRefinerTests
     {
         Assert.Equal(expected, DeterministicRefiner.Clean(input));
     }
+
+    [Fact]
+    public void Clean_KeepsRemixDropsChannelTag()
+    {
+        // "(Virtual Riot Remix)" must survive; "(AGRMusic)" is noise.
+        var cleaned = DeterministicRefiner.Clean("Stories Can Wait (Virtual Riot Remix).(AGRMusic)");
+
+        Assert.Contains("Virtual Riot Remix", cleaned, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("AGRMusic", cleaned, StringComparison.OrdinalIgnoreCase);
+    }
 }
 
 public sealed class OnnxQueryRefinerTests

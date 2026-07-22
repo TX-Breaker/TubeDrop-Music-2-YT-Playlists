@@ -23,11 +23,20 @@ public static class MatchScorer
     private const double PenaltyPerVariant = 0.25;
     private const double PenaltyCap = 0.50;
 
-    /// <summary>Variant markers penalized when the candidate has them and the source does not.</summary>
+    /// <summary>Markers penalized only when the CANDIDATE has them and the source does not.</summary>
     private static readonly string[] VariantMarkers =
     [
-        "live", "cover", "remix", "sped up", "slowed", "reverb",
+        "live", "cover", "sped up", "slowed", "reverb",
         "reaction", "8d", "karaoke", "instrumental",
+    ];
+
+    /// <summary>
+    /// Version-defining markers penalized when EITHER side has them and the other
+    /// does not — a remix file must not match the original, and vice versa.
+    /// </summary>
+    private static readonly string[] VersionMarkers =
+    [
+        "remix", "vip", "bootleg", "flip", "mashup", "rework", "remake", "edit",
     ];
 
     public static ScoredCandidate Score(TrackInfo source, MatchCandidate candidate)
@@ -102,6 +111,17 @@ public static class MatchScorer
             {
                 penalty += PenaltyPerVariant;
                 penalties.Add(marker);
+            }
+        }
+
+        // Version markers must match on BOTH sides: a remix file matching the
+        // original (or the reverse) is the wrong recording.
+        foreach (var marker in VersionMarkers)
+        {
+            if (ContainsMarker(comparableCandidate, marker) != ContainsMarker(comparableSource, marker))
+            {
+                penalty += PenaltyPerVariant;
+                penalties.Add($"version:{marker}");
             }
         }
 

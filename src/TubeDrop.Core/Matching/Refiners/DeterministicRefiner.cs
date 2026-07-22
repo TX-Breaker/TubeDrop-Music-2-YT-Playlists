@@ -64,10 +64,22 @@ public sealed partial class DeterministicRefiner : IQueryRefiner
         return Task.FromResult<IReadOnlyList<string>>(queries);
     }
 
+    /// <summary>Version markers that must survive bracket-stripping (they define the track).</summary>
+    private static readonly string[] VersionKeywords =
+        ["remix", "rmx", "vip", "bootleg", "flip", "mashup", "rework", "remake", "edit"];
+
     /// <summary>Strips brackets, featuring credits, leading track numbers, and release noise.</summary>
     internal static string Clean(string value)
     {
-        var cleaned = Brackets().Replace(value, " ");
+        // Remove brackets, but KEEP the contents of a bracket that names a version
+        // (e.g. "(Virtual Riot Remix)") — dropping it would lose the track's identity.
+        var cleaned = Brackets().Replace(value, m =>
+        {
+            var inner = m.Value.Trim('(', ')', '[', ']', '{', '}', ' ');
+            return VersionKeywords.Any(k => inner.Contains(k, StringComparison.OrdinalIgnoreCase))
+                ? $" {inner} "
+                : " ";
+        });
         cleaned = FeaturingTail().Replace(cleaned, " ");
         cleaned = LeadingNumber().Replace(cleaned, " ");
         cleaned = FilenameHeuristics.CleanNoise(cleaned);

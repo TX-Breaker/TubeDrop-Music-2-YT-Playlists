@@ -50,7 +50,7 @@ public sealed class MatchScorerTests
     [Theory]
     [InlineData("Song (Live)", "live")]
     [InlineData("Song (Cover)", "cover")]
-    [InlineData("Song Remix", "remix")]
+    [InlineData("Song Remix", "version:remix")]
     [InlineData("Song sped up", "sped up")]
     [InlineData("Song slowed reverb", "slowed")]
     [InlineData("Song 8D Audio", "8d")]
@@ -177,6 +177,29 @@ public sealed class MatchScorerTests
             Candidate("Hardcore Kidding", "Mat Weasel Busters", 275));
 
         Assert.True(scored.Score < 0.75, $"expected <0.75, got {scored.Score}");
+    }
+
+    [Fact]
+    public void RemixFile_MatchingOriginal_Penalized()
+    {
+        // Real case: file is a remix, candidate is the plain original → wrong version.
+        var original = MatchScorer.Score(
+            Track("Robyn", "Dancing On My Own (Skrillex Remix)", 200),
+            Candidate("Dancing on My Own", "Robyn", 200));
+
+        Assert.Contains(original.PenaltyReasons, r => r.StartsWith("version:remix"));
+        Assert.True(original.Score < 0.75, $"original should be penalized below threshold, got {original.Score}");
+    }
+
+    [Fact]
+    public void RemixFile_MatchingRemix_NotPenalized()
+    {
+        var remix = MatchScorer.Score(
+            Track("Robyn", "Dancing On My Own (Skrillex Remix)", 200),
+            Candidate("Dancing On My Own (Skrillex Remix)", "Robyn", 200));
+
+        Assert.DoesNotContain(remix.PenaltyReasons, r => r.StartsWith("version:"));
+        Assert.True(remix.Score >= 0.85, $"exact remix should score high, got {remix.Score}");
     }
 
     [Fact]
