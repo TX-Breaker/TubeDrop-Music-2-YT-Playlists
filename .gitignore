@@ -1,6 +1,11 @@
 # AI session state (continuity protocol)
 .ai_state.md
 
+# Local-only development/prompt notes — kept out of the public repo
+/docs/
+design-reference/figma/AGENTS.md
+design-reference/figma/CLAUDE.md
+
 # Build results
 bin/
 obj/
