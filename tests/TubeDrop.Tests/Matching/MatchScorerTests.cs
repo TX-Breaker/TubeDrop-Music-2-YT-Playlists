@@ -132,6 +132,51 @@ public sealed class MatchScorerTests
     }
 
     [Fact]
+    public void RemixerInCandidateTitle_CreditsArtist()
+    {
+        // Real case: file artist is the remixer; YouTube lists the original artist,
+        // but the remixer's name is in the candidate title.
+        var scored = MatchScorer.Score(
+            Track("Mat Weasel Busters, Mat Weasel", "The Speedfreak Boombox (Mat Weasel Remix)", 300),
+            Candidate("The Speedfreak - Boombox (Mat Weasel Remix)", "The Speedfreak", 300));
+
+        Assert.True(scored.Score >= 0.75, $"expected ≥0.75, got {scored.Score}");
+    }
+
+    [Fact]
+    public void ExactTitleMatchingDuration_NotVetoedByArtist()
+    {
+        // Real case: identical title, different uploader artist, same length.
+        var scored = MatchScorer.Score(
+            Track("Astro, Tony Boy", "PANINARO RMX (prod. 2nightfall)", 180),
+            Candidate("PANINARO RMX (prod. 2nightfall)", "SomeUploader", 180));
+
+        Assert.True(scored.Score >= 0.75, $"expected ≥0.75, got {scored.Score}");
+    }
+
+    [Fact]
+    public void DifferentSongSameArtist_StillRejected()
+    {
+        // A genuinely different title must stay below threshold. The near-exact
+        // title floor can't apply (title differs), and the different length helps.
+        var scored = MatchScorer.Score(
+            Track("Mat Weasel Busters", "Dies ist meine Barbara Hardcore", 240),
+            Candidate("Hardcore Kidding", "Mat Weasel Busters", 275));
+
+        Assert.True(scored.Score < 0.75, $"expected <0.75, got {scored.Score}");
+    }
+
+    [Fact]
+    public void RmxNotPenalizedAgainstRemixCandidate()
+    {
+        var withRmx = MatchScorer.Score(
+            Track("A", "Song RMX", 200),
+            Candidate("Song Remix", "A", 200));
+
+        Assert.DoesNotContain("remix", withRmx.PenaltyReasons);
+    }
+
+    [Fact]
     public void UnknownDurations_Neutral()
     {
         var scored = MatchScorer.Score(

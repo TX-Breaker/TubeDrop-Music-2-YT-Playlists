@@ -50,10 +50,17 @@ public static class MatchScorer
             var candidateArtists = candidate.Artists.Count > 0
                 ? candidate.Artists
                 : [candidate.Channel];
-            artistScore = candidateArtists
+            var artistVsArtists = candidateArtists
                 .Select(a => Fuzz.TokenSetRatio(sourceArtist, TextNormalizer.ForComparison(a)) / 100.0)
                 .DefaultIfEmpty(0)
                 .Max();
+
+            // Remixes/edits: the source "artist" is often the remixer, whose name
+            // sits in the candidate title while YouTube lists the original artist.
+            // Credit the artist when its name tokens appear in the candidate title.
+            var artistInTitle = ArtistTokensInTitle(sourceArtist, candidateTitle);
+
+            artistScore = Math.Max(artistVsArtists, artistInTitle);
         }
 
         // Duration: unknown on either side → neutral 0.5.
@@ -72,6 +79,14 @@ public static class MatchScorer
 
         var authorityScore = HasAuthority(candidate) ? 1.0 : 0.0;
 
+        // A near-exact title whose duration also matches is almost certainly the
+        // right upload, even when the artist field differs (common for remixes
+        // and edits). Don't let the artist veto it — floor the artist signal.
+        if (titleScore >= 0.95 && durationScore >= 0.8)
+        {
+            artistScore = Math.Max(artistScore, 0.5);
+        }
+
         var score = titleScore * TitleWeight
                     + artistScore * ArtistWeight
                     + durationScore * DurationWeight
@@ -79,10 +94,11 @@ public static class MatchScorer
 
         var penalties = new List<string>();
         var penalty = 0.0;
-        var comparableSource = $"{sourceTitle} {TextNormalizer.ForComparison(source.Album)}";
+        var comparableSource = NormalizeRemix($"{sourceTitle} {TextNormalizer.ForComparison(source.Album)}");
+        var comparableCandidate = NormalizeRemix(candidateTitle);
         foreach (var marker in VariantMarkers)
         {
-            if (ContainsMarker(candidateTitle, marker) && !ContainsMarker(comparableSource, marker))
+            if (ContainsMarker(comparableCandidate, marker) && !ContainsMarker(comparableSource, marker))
             {
                 penalty += PenaltyPerVariant;
                 penalties.Add(marker);
@@ -93,6 +109,34 @@ public static class MatchScorer
 
         return new ScoredCandidate(candidate, Math.Clamp(score, 0.0, 1.0), penalties);
     }
+
+    /// <summary>
+    /// Fraction of the source artist's significant tokens (≥3 chars) that appear
+    /// as whole tokens in the candidate title — catches the remixer-in-title case.
+    /// </summary>
+    private static double ArtistTokensInTitle(string sourceArtist, string candidateTitle)
+    {
+        var artistTokens = sourceArtist
+            .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+            .Where(t => t.Length >= 3)
+            .ToArray();
+        if (artistTokens.Length == 0)
+        {
+            return 0;
+        }
+
+        var titleTokens = candidateTitle
+            .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+            .ToHashSet(StringComparer.Ordinal);
+        var matched = artistTokens.Count(titleTokens.Contains);
+        return (double)matched / artistTokens.Length;
+    }
+
+    private static readonly System.Text.RegularExpressions.Regex RemixWord =
+        new(@"\brmx\b", System.Text.RegularExpressions.RegexOptions.Compiled);
+
+    /// <summary>Treats "rmx" as "remix" so a remix source isn't penalized against a remix candidate.</summary>
+    private static string NormalizeRemix(string text) => RemixWord.Replace(text, "remix");
 
     public static bool HasAuthority(MatchCandidate candidate) =>
         candidate.IsOfficialArtistChannel
