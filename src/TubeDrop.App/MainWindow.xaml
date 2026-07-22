@@ -20,7 +20,11 @@
       <RowDefinition Height="*" />
     </Grid.RowDefinitions>
 
-    <ui:TitleBar Grid.Row="0" Title="TubeDrop" />
+    <ui:TitleBar Grid.Row="0" Title="TubeDrop">
+      <ui:TitleBar.Icon>
+        <ui:ImageIcon Source="pack://application:,,,/tubedrop.ico" Width="18" Height="18" />
+      </ui:TitleBar.Icon>
+    </ui:TitleBar>
 
     <Grid Grid.Row="1">
       <Grid.ColumnDefinitions>

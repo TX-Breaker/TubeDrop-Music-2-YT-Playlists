@@ -190,12 +190,25 @@ public partial class HomeViewModel : ObservableObject
     [RelayCommand]
     private void RemoveTrack(TrackRow? row)
     {
-        if (row is null)
+        if (row is not null)
+        {
+            RemoveTracks([row]);
+        }
+    }
+
+    /// <summary>Removes several tracks at once (e.g. a multi-selection + Delete key).</summary>
+    public void RemoveTracks(IReadOnlyList<TrackRow> rows)
+    {
+        if (rows.Count == 0)
         {
             return;
         }
 
-        _removedPaths.Add(row.SourcePath);
+        foreach (var row in rows)
+        {
+            _removedPaths.Add(row.SourcePath);
+        }
+
         RebuildTrackList();
         UpdateFolderNaming();
         NotifyStartState();

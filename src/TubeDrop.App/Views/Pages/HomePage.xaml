@@ -57,17 +57,15 @@
               BorderBrush="{DynamicResource TubeDrop.Brush.Stroke}" BorderThickness="1"
               CornerRadius="{DynamicResource TubeDrop.Radius.Card}"
               Visibility="{Binding HasFiles, Converter={StaticResource BooleanToVisibilityConverter}}">
-        <ItemsControl ItemsSource="{Binding Tracks}" Margin="6">
-          <ItemsControl.Template>
-            <ControlTemplate TargetType="ItemsControl">
-              <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <ItemsPresenter />
-              </ScrollViewer>
-            </ControlTemplate>
-          </ItemsControl.Template>
-          <ItemsControl.ItemTemplate>
+        <ListBox x:Name="TrackList" ItemsSource="{Binding Tracks}" Margin="6"
+                 Background="{x:Null}" BorderThickness="0"
+                 SelectionMode="Extended"
+                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                 PreviewKeyDown="TrackList_OnKeyDown"
+                 HorizontalContentAlignment="Stretch">
+          <ListBox.ItemTemplate>
             <DataTemplate>
-              <Grid Margin="4,3" Height="40">
+              <Grid Margin="0,3" Height="40">
                 <Grid.ColumnDefinitions>
                   <ColumnDefinition Width="*" />
                   <ColumnDefinition Width="Auto" />
@@ -81,14 +79,14 @@
                 <Button Grid.Column="1" Style="{StaticResource TubeDrop.IconButton}"
                         VerticalAlignment="Center"
                         ToolTip="{Binding [Home_RemoveTrack], Source={StaticResource Loc}}"
-                        Command="{Binding DataContext.RemoveTrackCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                        Command="{Binding DataContext.RemoveTrackCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                         CommandParameter="{Binding}">
                   <ui:SymbolIcon Symbol="Dismiss24" FontSize="14" />
                 </Button>
               </Grid>
             </DataTemplate>
-          </ItemsControl.ItemTemplate>
-        </ItemsControl>
+          </ListBox.ItemTemplate>
+        </ListBox>
       </Border>
     </Grid>
 

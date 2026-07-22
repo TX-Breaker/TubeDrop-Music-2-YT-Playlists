@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -40,6 +41,22 @@ public partial class HomePage : UserControl
         if (ViewModel is not null)
         {
             ViewModel.CreateNew = false;
+        }
+    }
+
+    /// <summary>Delete / Backspace removes the selected tracks from the queue.</summary>
+    private void TrackList_OnKeyDown(object sender, KeyEventArgs e)
+    {
+        if ((e.Key != Key.Delete && e.Key != Key.Back) || ViewModel is null || sender is not ListBox list)
+        {
+            return;
+        }
+
+        var selected = list.SelectedItems.Cast<TrackRow>().ToList();
+        if (selected.Count > 0)
+        {
+            ViewModel.RemoveTracks(selected);
+            e.Handled = true;
         }
     }
 
