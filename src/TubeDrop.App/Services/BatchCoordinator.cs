@@ -51,6 +51,7 @@ public sealed class BatchCoordinator(
     MatchingEngine matchingEngine,
     JournaledPlaylistService playlistService,
     ISettingsStore settings,
+    LocalizationService loc,
     ILogger<BatchCoordinator> logger)
 {
     public async Task<BatchOutcome> RunAsync(
@@ -90,6 +91,10 @@ public sealed class BatchCoordinator(
                 else
                 {
                     item.Phase = TrackPhase.Unmatched;
+                    if (string.IsNullOrWhiteSpace(item.Track.Artist))
+                    {
+                        item.Message = loc["Batch_NoArtist"];
+                    }
                 }
             }
             catch (OperationCanceledException)

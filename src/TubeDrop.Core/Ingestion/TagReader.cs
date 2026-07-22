@@ -23,7 +23,14 @@ public sealed class TagReader : ITagReader
             return null;
         }
 
+        var albumArtist = Clean(track.AlbumArtist);
+        // Fall back to the album artist when there's no track artist tag.
         var artist = Clean(track.Artist);
+        if (artist.Length == 0)
+        {
+            artist = albumArtist;
+        }
+
         var title = Clean(track.Title);
 
         // ATL fills Title with the file name when no tag exists; treat a Title
@@ -39,7 +46,7 @@ public sealed class TagReader : ITagReader
                 Title = title,
                 Artist = artist,
                 Album = Clean(track.Album),
-                AlbumArtist = Clean(track.AlbumArtist),
+                AlbumArtist = albumArtist,
                 DurationSeconds = track.Duration,
                 TrackNumber = track.TrackNumber ?? 0,
                 Year = track.Year ?? 0,
@@ -55,7 +62,7 @@ public sealed class TagReader : ITagReader
             Title = heuristicTitle,
             Artist = artist.Length > 0 ? artist : heuristicArtist,
             Album = Clean(track.Album),
-            AlbumArtist = Clean(track.AlbumArtist),
+            AlbumArtist = albumArtist,
             DurationSeconds = track.Duration,
             TrackNumber = track.TrackNumber ?? trackNumber,
             Year = track.Year ?? 0,

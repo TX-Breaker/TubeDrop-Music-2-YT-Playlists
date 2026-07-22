@@ -47,6 +47,13 @@ public sealed record MatchingOptions
     public double Threshold { get; init; } = 0.75;
     public SearchScope Scope { get; init; } = SearchScope.YtmSongs;
     public bool AggressiveMode { get; init; }
+
+    /// <summary>
+    /// When true (default), a track whose artist could not be determined from
+    /// tags or the filename is reported as Unmatched without searching — a
+    /// title-only query is too ambiguous to trust (user request).
+    /// </summary>
+    public bool RequireArtist { get; init; } = true;
 }
 
 /// <summary>
@@ -65,6 +72,12 @@ public sealed class MatchingEngine(
         MatchingOptions options,
         CancellationToken ct = default)
     {
+        // No determinable artist → don't guess from a title-only query (user request).
+        if (options.RequireArtist && string.IsNullOrWhiteSpace(track.Artist))
+        {
+            return new TrackMatchResult(track, MatchStatus.Unmatched, null, null, null);
+        }
+
         ScoredCandidate? bestOverall = null;
         string? bestQuery = null;
         string? bestRefiner = null;

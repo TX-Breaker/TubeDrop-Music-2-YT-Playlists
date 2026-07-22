@@ -62,6 +62,7 @@
   <data name="Common_SessionExpired"><value>⚠ Session expired — sign in again to continue.</value></data>
   <data name="Account_Switch"><value>Switch account</value></data>
   <data name="Account_SignOut"><value>Sign out</value></data>
+  <data name="Batch_NoArtist"><value>No artist — skipped</value></data>
 
   <data name="Home_Title"><value>Drop your music</value></data>
   <data name="Home_Subtitle"><value>Files and folders — anything non-audio is skipped</value></data>

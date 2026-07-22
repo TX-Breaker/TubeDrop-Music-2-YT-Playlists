@@ -111,6 +111,31 @@ public sealed class MatchingEngineTests
     }
 
     [Fact]
+    public async Task NoArtist_Unmatched_WithoutSearching()
+    {
+        var searcher = new FakeSearcher(_ => [Good()]);
+        var engine = new MatchingEngine(searcher, []);
+        var noArtist = new TrackInfo { SourcePath = "x.mp3", Artist = "", Title = "Some Title", DurationSeconds = 200 };
+
+        var result = await engine.MatchAsync(noArtist, new MatchingOptions());
+
+        Assert.Equal(MatchStatus.Unmatched, result.Status);
+        Assert.Empty(searcher.Queries); // never searched
+    }
+
+    [Fact]
+    public async Task NoArtist_RequireArtistOff_StillSearches()
+    {
+        var searcher = new FakeSearcher(_ => [Good()]);
+        var engine = new MatchingEngine(searcher, []);
+        var noArtist = new TrackInfo { SourcePath = "x.mp3", Artist = "", Title = "One More Time", DurationSeconds = 320 };
+
+        var result = await engine.MatchAsync(noArtist, new MatchingOptions { RequireArtist = false });
+
+        Assert.NotEmpty(searcher.Queries);
+    }
+
+    [Fact]
     public async Task EmptySearchResults_Unmatched()
     {
         var searcher = new FakeSearcher(_ => []);
