@@ -103,6 +103,7 @@
   <data name="Settings_AcoustId"><value>Audio recognition (AcoustID + Chromaprint fpcalc)</value></data>
   <data name="Settings_AcoustIdKey"><value>AcoustID API key</value></data>
   <data name="Settings_AcoustIdMissing"><value>fpcalc (Chromaprint) not found — put fpcalc.exe next to TubeDrop or on PATH.</value></data>
+  <data name="Settings_CoverSearch"><value>Cover reverse-image search (experimental, uses your Google session)</value></data>
   <data name="Settings_Playlists"><value>Playlists</value></data>
   <data name="Settings_DefaultPrivacy"><value>Default privacy</value></data>
   <data name="Settings_Network"><value>Network &amp; updates</value></data>

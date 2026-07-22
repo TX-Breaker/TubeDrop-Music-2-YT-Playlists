@@ -55,6 +55,9 @@ public sealed record AppSettings
     public bool AcoustIdEnabled { get; init; }
     public string AcoustIdApiKey { get; init; } = "";
 
+    /// <summary>Keyless cover reverse-image search via the signed-in Google session (experimental).</summary>
+    public bool CoverSearchEnabled { get; init; }
+
     public PlaylistPrivacy DefaultPrivacy { get; init; } = PlaylistPrivacy.Private;
     public RateLimitProfile RateLimitProfile { get; init; } = RateLimitProfile.Normal;
     public UpdateChannel UpdateChannel { get; init; } = UpdateChannel.Stable;

@@ -50,6 +50,7 @@ public sealed class TagReader : ITagReader
                 DurationSeconds = track.Duration,
                 TrackNumber = track.TrackNumber ?? 0,
                 Year = track.Year ?? 0,
+                Genre = Clean(track.Genre),
                 Origin = TrackMetadataOrigin.Tags,
                 CoverArt = track.EmbeddedPictures.FirstOrDefault()?.PictureData,
             };
@@ -66,6 +67,7 @@ public sealed class TagReader : ITagReader
             DurationSeconds = track.Duration,
             TrackNumber = track.TrackNumber ?? trackNumber,
             Year = track.Year ?? 0,
+            Genre = Clean(track.Genre),
             Origin = TrackMetadataOrigin.FilenameHeuristics,
             CoverArt = track.EmbeddedPictures.FirstOrDefault()?.PictureData,
         };

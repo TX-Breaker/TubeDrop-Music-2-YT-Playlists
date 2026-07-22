@@ -21,8 +21,9 @@ public sealed record TrackInfo
     public int DurationSeconds { get; init; }
     public int TrackNumber { get; init; }
     public int Year { get; init; }
+    public string Genre { get; init; } = "";
     public TrackMetadataOrigin Origin { get; init; } = TrackMetadataOrigin.Tags;
 
-    /// <summary>Embedded cover art (first picture), UI display only — never uploaded.</summary>
+    /// <summary>Embedded cover art (first picture); UI display + optional reverse-image lookup.</summary>
     public byte[]? CoverArt { get; init; }
 }

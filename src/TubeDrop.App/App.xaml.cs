@@ -61,6 +61,7 @@ public partial class App : Application
                     _ => new Core.Matching.Refiners.LocalModelProvider());
                 services.AddSingleton<Core.Matching.IQueryRefiner, Core.Matching.Refiners.DeterministicRefiner>();
                 services.AddSingleton<Core.Matching.IQueryRefiner, Core.Matching.Refiners.OnnxQueryRefiner>();
+                services.AddSingleton<Core.Matching.IQueryRefiner, Core.Matching.Refiners.CoverImageRefiner>();
                 services.AddSingleton<Core.Matching.IQueryRefiner, Core.Matching.Refiners.CloudQueryRefiner>();
 
                 services.AddSingleton<Core.Matching.MatchingEngine>(sp => new Core.Matching.MatchingEngine(
@@ -74,6 +75,9 @@ public partial class App : Application
                     _ => new Core.Fingerprint.FpcalcFingerprinter());
                 services.AddSingleton<Core.Fingerprint.IAcoustIdClient, Core.Fingerprint.AcoustIdClient>();
                 services.AddSingleton<Core.Fingerprint.IMetadataEnricher, Core.Fingerprint.AcoustIdEnricher>();
+
+                // Keyless cover reverse-image lookup (Google Lens via the WebView2 session).
+                services.AddSingleton<Core.Cover.ICoverImageLookup, Services.WebView2CoverImageLookup>();
                 services.AddSingleton<Services.ISkinManager>(_ => new Services.SkinManager(Current));
                 services.AddSingleton<Services.LocalizationService>();
                 services.AddSingleton<Services.UpdateService>();

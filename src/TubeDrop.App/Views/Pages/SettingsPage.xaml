@@ -77,6 +77,10 @@
                    PasswordChanged="AcoustIdKeyBox_OnPasswordChanged"
                    Visibility="{Binding AcoustIdEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
+      <CheckBox Content="{Binding [Settings_CoverSearch], Source={StaticResource Loc}}" Margin="0,12,0,0"
+                Foreground="{DynamicResource TubeDrop.Brush.Text}"
+                IsChecked="{Binding CoverSearchEnabled}" />
+
       <TextBlock Text="{Binding [Settings_Playlists], Source={StaticResource Loc}}" Style="{StaticResource Section}" />
       <TextBlock Text="{Binding [Settings_DefaultPrivacy], Source={StaticResource Loc}}" Style="{StaticResource Label}" />
       <ComboBox Width="220" HorizontalAlignment="Left"
