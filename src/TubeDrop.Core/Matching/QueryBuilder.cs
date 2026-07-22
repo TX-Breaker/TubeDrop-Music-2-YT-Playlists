@@ -45,19 +45,19 @@ public static class QueryBuilder
             Add($"{artist} {title}");
             Add($"{title} {artist}");
         }
-
-        Add(title);
-
-        // No artist to anchor a generic title (e.g. "Hurricane") → add the genre as
-        // a hint so YouTube surfaces the right style; duration then disambiguates.
-        if (artist.Length == 0 && track.Genre.Length > 0)
+        else if (track.Genre.Length > 0)
         {
+            // No artist to anchor a generic title (e.g. "Hurricane"): try the genre
+            // FIRST, so the right-style candidate is found before a same-title song
+            // of a different genre can lock in. Duration then disambiguates.
             var genre = FilenameHeuristics.CleanNoise(PrimaryGenre(track.Genre));
             if (genre.Length > 0)
             {
                 Add($"{title} {genre}");
             }
         }
+
+        Add(title);
 
         // Transliterated variants only when they differ (non-Latin scripts).
         if (nonLatin)

@@ -107,6 +107,20 @@ public static class MatchScorer
 
         score -= Math.Min(penalty, PenaltyCap);
 
+        // Duration is the strongest disambiguator for generic titles: a candidate
+        // whose length is well off the file is very likely a different recording.
+        // Penalise large gaps hard so "same title, wrong length" loses.
+        if (source.DurationSeconds > 0 && candidate.DurationSeconds > 0)
+        {
+            var delta = Math.Abs(source.DurationSeconds - candidate.DurationSeconds);
+            if (delta > 15)
+            {
+                var durationPenalty = Math.Min(0.35, (delta - 15) / 70.0);
+                score -= durationPenalty;
+                penalties.Add($"duration±{delta}s");
+            }
+        }
+
         return new ScoredCandidate(candidate, Math.Clamp(score, 0.0, 1.0), penalties);
     }
 

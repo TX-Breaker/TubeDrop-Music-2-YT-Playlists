@@ -93,9 +93,9 @@ public sealed class MatchScorerTests
     [InlineData(3, 1.0)]
     [InlineData(9, 0.5)]
     [InlineData(15, 0.0)]
-    [InlineData(60, 0.0)]
     public void DurationFactor_FollowsSpecCurve(int delta, double expectedFactor)
     {
+        // Deltas up to 15s: pure duration-weight curve, no extra mismatch penalty.
         var baseline = MatchScorer.Score(
             Track("A", "Song", 200),
             Candidate("Song", "A", 200));
@@ -105,6 +105,19 @@ public sealed class MatchScorerTests
 
         var lost = baseline.Score - shifted.Score;
         Assert.Equal(0.20 * (1.0 - expectedFactor), lost, precision: 6);
+    }
+
+    [Fact]
+    public void LargeDurationMismatch_HeavilyPenalized()
+    {
+        // Same title + artist but very different length → likely a different
+        // recording. The extra penalty must push it well down.
+        var close = MatchScorer.Score(Track("A", "Song", 200), Candidate("Song", "A", 200));
+        var farOff = MatchScorer.Score(Track("A", "Song", 200), Candidate("Song", "A", 265));
+
+        Assert.True(close.Score - farOff.Score >= 0.4,
+            $"expected a big gap, got {close.Score - farOff.Score}");
+        Assert.Contains(farOff.PenaltyReasons, r => r.StartsWith("duration"));
     }
 
     [Fact]

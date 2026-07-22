@@ -5,9 +5,10 @@ namespace TubeDrop.InnerTube.Search;
 
 /// <summary>
 /// Adapts <see cref="ISearchClient"/> to the Core matching contract, top N per
-/// source (§7). Resilient per source: if one source fails (e.g. a transient
-/// error), it is skipped and the others still contribute — one flaky source
-/// never fails the whole track.
+/// source (§7). YouTube Music is searched first; plain YouTube (WEB) is only a
+/// fallback for the "All" scope when YTM returned nothing — YTM's canonical
+/// song entries are more reliable. Resilient per source: a single failing source
+/// is skipped and the others still contribute.
 /// </summary>
 public sealed class InnerTubeCandidateSearcher(
     ISearchClient searchClient, ILogger<InnerTubeCandidateSearcher> logger) : ICandidateSearcher
@@ -20,6 +21,7 @@ public sealed class InnerTubeCandidateSearcher(
         var results = new List<MatchCandidate>();
         var anyFailed = false;
 
+        // --- YouTube Music first ---
         if (scope is SearchScope.YtmSongs or SearchScope.YtmSongsAndVideos or SearchScope.All)
         {
             anyFailed |= !await TryAddAsync(results, "YTM songs",
@@ -32,14 +34,16 @@ public sealed class InnerTubeCandidateSearcher(
                 () => searchClient.SearchYtmVideosAsync(query, ct), ct).ConfigureAwait(false);
         }
 
-        if (scope is SearchScope.YouTube or SearchScope.All)
+        // --- Plain YouTube: only the dedicated scope, or as an "All" fallback ---
+        var wantYouTube = scope is SearchScope.YouTube
+                          || (scope is SearchScope.All && results.Count == 0);
+        if (wantYouTube)
         {
             anyFailed |= !await TryAddAsync(results, "YouTube",
                 () => searchClient.SearchYouTubeAsync(query, ct), ct).ConfigureAwait(false);
         }
 
-        // If every attempted source failed, surface it so the track is Error, not
-        // a false "no match". If at least one worked, degrade quietly.
+        // Every attempted source failed → surface it (Error, not a false "no match").
         if (anyFailed && results.Count == 0)
         {
             throw new InvalidOperationException("All search sources failed for this query.");
