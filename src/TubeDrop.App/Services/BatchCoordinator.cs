@@ -21,7 +21,8 @@ public enum TrackPhase
 /// <summary>Live state of one track through the batch — bound by the Queue view.</summary>
 public sealed class TrackProgress(TrackInfo track)
 {
-    public TrackInfo Track { get; } = track;
+    /// <summary>Mutable so enrichment (fingerprint recognition) can refine it before matching.</summary>
+    public TrackInfo Track { get; set; } = track;
     public TrackPhase Phase { get; set; } = TrackPhase.Pending;
     public TrackMatchResult? Match { get; set; }
     public string? Message { get; set; }
@@ -51,6 +52,7 @@ public sealed class BatchCoordinator(
     MatchingEngine matchingEngine,
     JournaledPlaylistService playlistService,
     ISettingsStore settings,
+    TubeDrop.Core.Fingerprint.IMetadataEnricher enricher,
     LocalizationService loc,
     ILogger<BatchCoordinator> logger)
 {
@@ -80,6 +82,9 @@ public sealed class BatchCoordinator(
 
             try
             {
+                // Recognize the real artist/title from audio when metadata is weak (opt-in).
+                item.Track = await enricher.EnrichAsync(item.Track, ct).ConfigureAwait(false);
+
                 var result = await matchingEngine.MatchAsync(item.Track, options, ct).ConfigureAwait(false);
                 item.Match = result;
                 if (result.Status is MatchStatus.AutoMatched or MatchStatus.FallbackMatched or MatchStatus.AggressiveMatched

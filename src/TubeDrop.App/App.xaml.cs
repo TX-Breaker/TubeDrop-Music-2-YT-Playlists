@@ -68,6 +68,12 @@ public partial class App : Application
                     sp.GetServices<Core.Matching.IQueryRefiner>()));
 
                 services.AddSingleton<Core.Settings.ISettingsStore>(new Core.Settings.SettingsStore());
+
+                // Acoustic fingerprint recognition (AcoustID + Chromaprint) — opt-in.
+                services.AddSingleton<Core.Fingerprint.IAudioFingerprinter>(
+                    _ => new Core.Fingerprint.FpcalcFingerprinter());
+                services.AddSingleton<Core.Fingerprint.IAcoustIdClient, Core.Fingerprint.AcoustIdClient>();
+                services.AddSingleton<Core.Fingerprint.IMetadataEnricher, Core.Fingerprint.AcoustIdEnricher>();
                 services.AddSingleton<Services.ISkinManager>(_ => new Services.SkinManager(Current));
                 services.AddSingleton<Services.LocalizationService>();
                 services.AddSingleton<Services.UpdateService>();

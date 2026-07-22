@@ -100,6 +100,9 @@
   <data name="Settings_Fallback"><value>Fallback modules</value></data>
   <data name="Settings_Onnx"><value>Local ONNX title-recognition refiner (downloads on first use)</value></data>
   <data name="Settings_Cloud"><value>Cloud LLM refiner</value></data>
+  <data name="Settings_AcoustId"><value>Audio recognition (AcoustID + Chromaprint fpcalc)</value></data>
+  <data name="Settings_AcoustIdKey"><value>AcoustID API key</value></data>
+  <data name="Settings_AcoustIdMissing"><value>fpcalc (Chromaprint) not found — put fpcalc.exe next to TubeDrop or on PATH.</value></data>
   <data name="Settings_Playlists"><value>Playlists</value></data>
   <data name="Settings_DefaultPrivacy"><value>Default privacy</value></data>
   <data name="Settings_Network"><value>Network &amp; updates</value></data>

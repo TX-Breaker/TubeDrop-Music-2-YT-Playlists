@@ -13,10 +13,20 @@ public partial class SettingsPage : UserControl
 
     private void OnLoaded(object sender, System.Windows.RoutedEventArgs e)
     {
-        // PasswordBox.Password is not bindable; seed it from the current setting.
-        if (DataContext is SettingsViewModel vm && CloudKeyBox.Password != vm.CloudRefinerApiKey)
+        // PasswordBox.Password is not bindable; seed it from the current settings.
+        if (DataContext is not SettingsViewModel vm)
+        {
+            return;
+        }
+
+        if (CloudKeyBox.Password != vm.CloudRefinerApiKey)
         {
             CloudKeyBox.Password = vm.CloudRefinerApiKey;
+        }
+
+        if (AcoustIdKeyBox.Password != vm.AcoustIdApiKey)
+        {
+            AcoustIdKeyBox.Password = vm.AcoustIdApiKey;
         }
     }
 
@@ -25,6 +35,14 @@ public partial class SettingsPage : UserControl
         if (DataContext is SettingsViewModel vm)
         {
             vm.CloudRefinerApiKey = CloudKeyBox.Password;
+        }
+    }
+
+    private void AcoustIdKeyBox_OnPasswordChanged(object sender, System.Windows.RoutedEventArgs e)
+    {
+        if (DataContext is SettingsViewModel vm)
+        {
+            vm.AcoustIdApiKey = AcoustIdKeyBox.Password;
         }
     }
 }

@@ -65,6 +65,18 @@
                    PasswordChanged="CloudKeyBox_OnPasswordChanged"
                    Visibility="{Binding CloudRefinerEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
+      <CheckBox Content="{Binding [Settings_AcoustId], Source={StaticResource Loc}}" Margin="0,12,0,0"
+                Foreground="{DynamicResource TubeDrop.Brush.Text}"
+                IsChecked="{Binding AcoustIdEnabled}" />
+      <TextBlock Text="{Binding [Settings_AcoustIdMissing], Source={StaticResource Loc}}" FontSize="11" TextWrapping="Wrap"
+                 Foreground="{DynamicResource TubeDrop.Brush.Warn}" Margin="0,4,0,0"
+                 Visibility="{Binding FingerprinterAvailable, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+      <TextBlock Text="{Binding [Settings_AcoustIdKey], Source={StaticResource Loc}}" Style="{StaticResource Label}"
+                 Visibility="{Binding AcoustIdEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
+      <PasswordBox x:Name="AcoustIdKeyBox" Width="320" HorizontalAlignment="Left"
+                   PasswordChanged="AcoustIdKeyBox_OnPasswordChanged"
+                   Visibility="{Binding AcoustIdEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
       <TextBlock Text="{Binding [Settings_Playlists], Source={StaticResource Loc}}" Style="{StaticResource Section}" />
       <TextBlock Text="{Binding [Settings_DefaultPrivacy], Source={StaticResource Loc}}" Style="{StaticResource Label}" />
       <ComboBox Width="220" HorizontalAlignment="Left"

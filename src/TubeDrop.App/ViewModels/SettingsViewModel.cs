@@ -25,6 +25,9 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _onnxRefinerEnabled;
     [ObservableProperty] private bool _cloudRefinerEnabled;
     [ObservableProperty] private string _cloudRefinerApiKey = "";
+    [ObservableProperty] private bool _acoustIdEnabled;
+    [ObservableProperty] private string _acoustIdApiKey = "";
+    [ObservableProperty] private bool _fingerprinterAvailable;
     [ObservableProperty] private PlaylistPrivacy _defaultPrivacy;
     [ObservableProperty] private RateLimitProfile _rateLimitProfile;
     [ObservableProperty] private UpdateChannel _updateChannel;
@@ -37,10 +40,14 @@ public partial class SettingsViewModel : ObservableObject
     public Array Channels { get; } = Enum.GetValues<UpdateChannel>();
     public string[] Languages { get; } = ["auto", "it", "en"];
 
-    public SettingsViewModel(ISettingsStore settings, ISkinManager skinManager)
+    public SettingsViewModel(
+        ISettingsStore settings,
+        ISkinManager skinManager,
+        TubeDrop.Core.Fingerprint.IAudioFingerprinter fingerprinter)
     {
         _settings = settings;
         _skinManager = skinManager;
+        FingerprinterAvailable = fingerprinter.IsAvailable;
         LoadFrom(settings.Current);
     }
 
@@ -56,6 +63,8 @@ public partial class SettingsViewModel : ObservableObject
         OnnxRefinerEnabled = s.OnnxRefinerEnabled;
         CloudRefinerEnabled = s.CloudRefinerEnabled;
         CloudRefinerApiKey = s.CloudRefinerApiKey;
+        AcoustIdEnabled = s.AcoustIdEnabled;
+        AcoustIdApiKey = s.AcoustIdApiKey;
         DefaultPrivacy = s.DefaultPrivacy;
         RateLimitProfile = s.RateLimitProfile;
         UpdateChannel = s.UpdateChannel;
@@ -87,6 +96,8 @@ public partial class SettingsViewModel : ObservableObject
     partial void OnOnnxRefinerEnabledChanged(bool value) => Persist(s => s with { OnnxRefinerEnabled = value });
     partial void OnCloudRefinerEnabledChanged(bool value) => Persist(s => s with { CloudRefinerEnabled = value });
     partial void OnCloudRefinerApiKeyChanged(string value) => Persist(s => s with { CloudRefinerApiKey = value });
+    partial void OnAcoustIdEnabledChanged(bool value) => Persist(s => s with { AcoustIdEnabled = value });
+    partial void OnAcoustIdApiKeyChanged(string value) => Persist(s => s with { AcoustIdApiKey = value });
     partial void OnDefaultPrivacyChanged(PlaylistPrivacy value) => Persist(s => s with { DefaultPrivacy = value });
     partial void OnRateLimitProfileChanged(RateLimitProfile value) => Persist(s => s with { RateLimitProfile = value });
     partial void OnUpdateChannelChanged(UpdateChannel value) => Persist(s => s with { UpdateChannel = value });

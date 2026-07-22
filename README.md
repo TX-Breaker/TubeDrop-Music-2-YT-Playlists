@@ -19,6 +19,8 @@ with full undo for every action.
 - **Automatic matching** with fuzzy title/artist scoring, duration checks, and
   official-source bonuses; a fallback ladder (deterministic → cloud) handles hard cases,
   including transliteration of non-Latin scripts
+- **Optional audio recognition** (AcoustID + Chromaprint) to recover the real
+  artist/title from the audio itself when tags/filenames are poor
 - **Create** a new playlist (name it after the dropped folder if you like) or **append**
   to an existing one
 - **Full undo**: every mutating operation is journaled with its inverse; undo a single
@@ -86,6 +88,22 @@ src/TubeDrop.InnerTube   youtubei HTTP client + parsers
 tests/TubeDrop.Tests     xUnit test suite
 design-reference/        the three UI skin references
 ```
+
+## Audio recognition (optional)
+
+When a file's tags or name are too poor to identify it, TubeDrop can recognize the
+song from the audio itself, "Shazam-style", using the open **AcoustID** service and
+the **Chromaprint** fingerprint tool. To enable it:
+
+1. Get a free **AcoustID application API key** at
+   [acoustid.org/new-application](https://acoustid.org/new-application).
+2. Install **Chromaprint** and put `fpcalc.exe` next to `TubeDrop.exe` or on your
+   `PATH` ([download](https://acoustid.org/chromaprint)).
+3. In **Settings → Fallback modules**, enable *Audio recognition* and paste the key.
+
+Only files with weak metadata are fingerprinted (one AcoustID call each); well-tagged
+files are left untouched. If either the key or `fpcalc` is missing, the feature stays
+off and nothing else changes.
 
 ## FAQ
 

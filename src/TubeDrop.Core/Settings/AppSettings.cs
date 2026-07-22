@@ -51,6 +51,10 @@ public sealed record AppSettings
     public string CloudRefinerApiKey { get; init; } = "";
     public string CloudRefinerModel { get; init; } = "claude-sonnet-5";
 
+    /// <summary>Acoustic fingerprint recognition (AcoustID + Chromaprint) to fix poor tags/filenames.</summary>
+    public bool AcoustIdEnabled { get; init; }
+    public string AcoustIdApiKey { get; init; } = "";
+
     public PlaylistPrivacy DefaultPrivacy { get; init; } = PlaylistPrivacy.Private;
     public RateLimitProfile RateLimitProfile { get; init; } = RateLimitProfile.Normal;
     public UpdateChannel UpdateChannel { get; init; } = UpdateChannel.Stable;
