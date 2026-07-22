@@ -98,6 +98,25 @@ public sealed class JournaledPlaylistServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task AddItems_OneBadVideo_DoesNotKillBatch_OthersAdded()
+    {
+        _service.BeginSession();
+        var playlistId = await _service.CreatePlaylistAsync("L", "", PlaylistPrivacy.Private);
+        _client.FailVideoIds.Add("bad");
+
+        // Chunk add throws on "bad"; per-video fallback isolates it.
+        var added = await _service.AddItemsAsync(playlistId, ["v1", "bad", "v2"]);
+
+        Assert.Equal(2, added.Count); // v1 and v2 got in
+        Assert.DoesNotContain(added, a => a.VideoId == "bad");
+        Assert.Equal(2, _client.Playlists[playlistId].Count);
+        // The bad video's op is marked Failed, not faked.
+        var ops = _store.GetSessionOperations(_service.CurrentSessionId)
+            .Where(o => o.Type == OperationTypes.AddItem).ToList();
+        Assert.Contains(ops, o => o.Status == OperationStatus.Failed && o.PayloadJson.Contains("bad"));
+    }
+
+    [Fact]
     public async Task DeletePlaylist_SnapshotsBeforeDeleting()
     {
         _service.BeginSession();

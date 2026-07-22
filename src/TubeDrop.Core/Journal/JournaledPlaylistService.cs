@@ -71,19 +71,17 @@ public sealed class JournaledPlaylistService(JournalStore journal, IPlaylistClie
                     new RemoveItemPayload(playlistId, "", videoId)));
             }
 
+            // Add the whole chunk in one call for speed. If it fails (e.g. one
+            // video makes YouTube return 409), fall back to adding the chunk one
+            // video at a time so a single bad video can't kill the whole batch.
             IReadOnlyList<AddedItem> chunkResult;
             try
             {
                 chunkResult = await client.AddItemsAsync(playlistId, chunk, ct).ConfigureAwait(false);
             }
-            catch
+            catch (Exception) when (!ct.IsCancellationRequested)
             {
-                foreach (var id in operationIds)
-                {
-                    journal.SetStatus(id, OperationStatus.Failed);
-                }
-
-                throw;
+                chunkResult = await AddOneByOneAsync(playlistId, chunk, ct).ConfigureAwait(false);
             }
 
             for (var i = 0; i < chunk.Length; i++)
@@ -114,6 +112,32 @@ public sealed class JournaledPlaylistService(JournalStore journal, IPlaylistClie
         }
 
         return added;
+    }
+
+    /// <summary>
+    /// Adds a chunk one video at a time, isolating failures. A video that YouTube
+    /// rejects (e.g. HTTP 409 — already present / not addable) is returned with a
+    /// null setVideoId so the caller marks just that track failed and continues.
+    /// </summary>
+    private async Task<IReadOnlyList<AddedItem>> AddOneByOneAsync(
+        string playlistId, IReadOnlyList<string> chunk, CancellationToken ct)
+    {
+        var results = new List<AddedItem>();
+        foreach (var videoId in chunk)
+        {
+            ct.ThrowIfCancellationRequested();
+            try
+            {
+                var single = await client.AddItemsAsync(playlistId, [videoId], ct).ConfigureAwait(false);
+                results.Add(single.FirstOrDefault() ?? new AddedItem(videoId, null));
+            }
+            catch (Exception) when (!ct.IsCancellationRequested)
+            {
+                results.Add(new AddedItem(videoId, null));
+            }
+        }
+
+        return results;
     }
 
     public async Task RemoveItemsAsync(

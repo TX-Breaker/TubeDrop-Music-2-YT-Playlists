@@ -14,6 +14,9 @@ public sealed class FakePlaylistClient : IPlaylistClient
     /// <summary>When true, AddItemsAsync returns items without a setVideoId (simulates schema drift).</summary>
     public bool SuppressSetVideoIds { get; set; }
 
+    /// <summary>VideoIds that make an add call throw (simulates YouTube's 409 on a bad video).</summary>
+    public HashSet<string> FailVideoIds { get; } = [];
+
     public Task<string> CreatePlaylistAsync(
         string title, string description, PlaylistPrivacy privacy,
         IReadOnlyList<string>? initialVideoIds = null, CancellationToken ct = default)
@@ -34,6 +37,12 @@ public sealed class FakePlaylistClient : IPlaylistClient
     public Task<IReadOnlyList<AddedItem>> AddItemsAsync(
         string playlistId, IReadOnlyList<string> videoIds, CancellationToken ct = default)
     {
+        // A single bad video makes the whole call fail — like YouTube's 409.
+        if (videoIds.Any(FailVideoIds.Contains))
+        {
+            throw new InvalidOperationException("HTTP 409 (simulated)");
+        }
+
         var list = Playlists.TryGetValue(playlistId, out var existing) ? existing : Playlists[playlistId] = [];
         var added = new List<AddedItem>();
         foreach (var videoId in videoIds)
