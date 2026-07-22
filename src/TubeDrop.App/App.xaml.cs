@@ -88,6 +88,18 @@ public partial class App : Application
     {
         await _host.StartAsync();
 
+        // Dev capture mode (§5 fixture-first): set TUBEDROP_CAPTURE=1 to dump every
+        // InnerTube response (sanitized) to %LOCALAPPDATA%\TubeDrop\captures for
+        // building/hardening parsers against real authenticated traffic.
+        if (Environment.GetEnvironmentVariable("TUBEDROP_CAPTURE") is "1" or "true")
+        {
+            var captureDir = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "TubeDrop", "captures");
+            _host.Services.GetRequiredService<TubeDrop.InnerTube.Http.InnerTubeTransport>()
+                .CaptureDirectory = captureDir;
+        }
+
         // Apply the persisted skin + theme before showing the window (§12.1).
         var settingsStore = _host.Services.GetRequiredService<Core.Settings.ISettingsStore>();
         var settings = settingsStore.Current;
