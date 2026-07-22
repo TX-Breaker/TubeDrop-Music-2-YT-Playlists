@@ -124,6 +124,19 @@ public sealed class MatchingEngineTests
     }
 
     [Fact]
+    public async Task NonLatinTitle_NoArtist_StillSearchesVerbatim()
+    {
+        var searcher = new FakeSearcher(_ => [Good()]);
+        var engine = new MatchingEngine(searcher, []);
+        var cjk = new TrackInfo { SourcePath = "x.mp3", Artist = "", Title = "布瑞吉Bridge-来我敬你", DurationSeconds = 200 };
+
+        await engine.MatchAsync(cjk, new MatchingOptions());
+
+        // Not skipped despite no artist; the raw title is searched.
+        Assert.Contains("布瑞吉Bridge-来我敬你", searcher.Queries);
+    }
+
+    [Fact]
     public async Task NoArtist_RequireArtistOff_StillSearches()
     {
         var searcher = new FakeSearcher(_ => [Good()]);

@@ -26,6 +26,20 @@ public static class QueryBuilder
             }
         }
 
+        var nonLatin = TextNormalizer.HasNonLatin(artist) || TextNormalizer.HasNonLatin(title);
+
+        // Non-Latin (Chinese, Devanagari, …): search the file's own name first,
+        // verbatim, without interpreting the artist — YouTube titles for these
+        // usually match the raw name better than any parsed artist/title split.
+        if (nonLatin)
+        {
+            Add(track.Title);
+            if (artist.Length > 0)
+            {
+                Add($"{artist} {title}");
+            }
+        }
+
         if (artist.Length > 0)
         {
             Add($"{artist} {title}");
@@ -35,7 +49,7 @@ public static class QueryBuilder
         Add(title);
 
         // Transliterated variants only when they differ (non-Latin scripts).
-        if (TextNormalizer.HasNonLatin(artist) || TextNormalizer.HasNonLatin(title))
+        if (nonLatin)
         {
             var artistTr = TextNormalizer.Transliterated(artist);
             var titleTr = TextNormalizer.Transliterated(title);

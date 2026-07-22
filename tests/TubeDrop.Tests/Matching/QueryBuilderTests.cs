@@ -50,6 +50,16 @@ public sealed class QueryBuilderTests
     }
 
     [Fact]
+    public void Build_NonLatinNoArtist_SearchesVerbatimTitleFirst()
+    {
+        var track = new TrackInfo { SourcePath = "x.mp3", Artist = "", Title = "布瑞吉Bridge-来我敬你" };
+
+        var queries = QueryBuilder.Build(track);
+
+        Assert.Equal("布瑞吉Bridge-来我敬你", queries[0]); // exact file title, first
+    }
+
+    [Fact]
     public void Build_LatinOnly_NoTransliteratedDuplicates()
     {
         var queries = QueryBuilder.Build(Track("Queen", "Bohemian Rhapsody"));

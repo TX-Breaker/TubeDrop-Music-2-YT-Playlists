@@ -73,7 +73,10 @@ public sealed class MatchingEngine(
         CancellationToken ct = default)
     {
         // No determinable artist → don't guess from a title-only query (user request).
-        if (options.RequireArtist && string.IsNullOrWhiteSpace(track.Artist))
+        // Exception: non-Latin titles (Chinese, Devanagari, …) are searched verbatim
+        // as named, without needing an artist.
+        if (options.RequireArtist && string.IsNullOrWhiteSpace(track.Artist)
+            && !TextNormalizer.HasNonLatin(track.Title))
         {
             return new TrackMatchResult(track, MatchStatus.Unmatched, null, null, null);
         }
