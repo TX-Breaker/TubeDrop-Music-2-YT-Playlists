@@ -7,13 +7,11 @@ using TubeDrop.InnerTube.Json;
 namespace TubeDrop.InnerTube.Playlists;
 
 /// <summary>
-/// Playlist mutations via WEB_REMIX youtubei endpoints (§5).
-///
-/// TODO(fixtures): these endpoints require an authenticated session, so no real
-/// fixtures could be captured yet (§15). Parsing below targets the documented
-/// response shapes and is written defensively; the transport's capture mode
-/// must be enabled during the first signed-in spike run to dump real fixtures
-/// into tests/fixtures, and the parsers then hardened against them.
+/// Playlist mutations + library/item reads via WEB_REMIX youtubei endpoints (§5).
+/// Parsing lives in <see cref="PlaylistResponseParser"/>; the create, add, and
+/// library shapes were verified against real authenticated traffic (2026-07-22).
+/// The playlist-items browse shape is only exercised on delete and remains the
+/// one path not yet confirmed against a live capture.
 /// </summary>
 public sealed class PlaylistClient(InnerTubeTransport transport, ILogger<PlaylistClient> logger) : IPlaylistClient
 {
@@ -43,7 +41,7 @@ public sealed class PlaylistClient(InnerTubeTransport transport, ILogger<Playlis
         var root = await transport.PostAsync(InnerTubeTransport.MusicOrigin, "playlist/create", body, ct)
             .ConfigureAwait(false);
 
-        var playlistId = root.GetString("playlistId");
+        var playlistId = PlaylistResponseParser.ParseCreatedPlaylistId(root);
         if (string.IsNullOrEmpty(playlistId))
         {
             throw new InnerTubeException("playlist/create returned no playlistId — schema may have changed");
@@ -70,30 +68,15 @@ public sealed class PlaylistClient(InnerTubeTransport transport, ILogger<Playlis
         var root = await transport.PostAsync(InnerTubeTransport.MusicOrigin, "browse/edit_playlist", body, ct)
             .ConfigureAwait(false);
 
-        var status = root.GetString("status");
+        var status = PlaylistResponseParser.ParseStatus(root);
         if (status is not null && !status.Contains("SUCCEEDED", StringComparison.OrdinalIgnoreCase))
         {
             throw new InnerTubeException($"edit_playlist add returned status {status}");
         }
 
-        var results = new List<AddedItem>();
-        foreach (var edit in root.GetArray("playlistEditResults"))
-        {
-            var data = edit.Get("playlistEditVideoAddedResultData");
-            if (data is { } d)
-            {
-                var videoId = d.GetString("videoId") ?? "";
-                var setVideoId = d.GetString("setVideoId");
-                if (videoId.Length > 0)
-                {
-                    results.Add(new AddedItem(videoId, setVideoId));
-                }
-            }
-        }
-
         // Schema drift guard: adds reported success but no per-item results →
         // callers treat missing setVideoIds as non-undoable and fail loudly.
-        return results;
+        return PlaylistResponseParser.ParseAddedItems(root);
     }
 
     public async Task RemoveItemsAsync(
@@ -115,7 +98,7 @@ public sealed class PlaylistClient(InnerTubeTransport transport, ILogger<Playlis
         var root = await transport.PostAsync(InnerTubeTransport.MusicOrigin, "browse/edit_playlist", body, ct)
             .ConfigureAwait(false);
 
-        var status = root.GetString("status");
+        var status = PlaylistResponseParser.ParseStatus(root);
         if (status is not null && !status.Contains("SUCCEEDED", StringComparison.OrdinalIgnoreCase))
         {
             throw new InnerTubeException($"edit_playlist remove returned status {status}");
@@ -135,10 +118,8 @@ public sealed class PlaylistClient(InnerTubeTransport transport, ILogger<Playlis
             new Dictionary<string, object?> { ["browseId"] = "FEmusic_liked_playlists" }, ct)
             .ConfigureAwait(false);
 
-        // Library grid: singleColumnBrowseResultsRenderer → tabs → sectionList →
-        // gridRenderer.items[].musicTwoRowItemRenderer. Defensive throughout.
         var results = new List<PlaylistSummary>();
-        CollectLibraryPlaylists(root, results);
+        PlaylistResponseParser.CollectLibraryPage(root, results);
 
         // Follow continuations so a large library isn't truncated (§11).
         var token = ContinuationPaging.FindToken(root);
@@ -150,14 +131,7 @@ public sealed class PlaylistClient(InnerTubeTransport transport, ILogger<Playlis
                 new Dictionary<string, object?> { ["continuation"] = token }, ct).ConfigureAwait(false);
 
             var before = results.Count;
-            foreach (var array in ContinuationPaging.FindItemArrays(page))
-            {
-                foreach (var item in array.EnumerateArray())
-                {
-                    TryAddLibraryPlaylist(item, results);
-                }
-            }
-
+            PlaylistResponseParser.CollectLibraryPage(page, results);
             token = ContinuationPaging.FindToken(page);
             if (results.Count == before)
             {
@@ -183,7 +157,7 @@ public sealed class PlaylistClient(InnerTubeTransport transport, ILogger<Playlis
             .ConfigureAwait(false);
 
         var items = new List<PlaylistItem>();
-        CollectPlaylistItems(root, items);
+        PlaylistResponseParser.CollectPlaylistItemsPage(root, items);
 
         // Follow continuations so a large playlist snapshot is complete — undo of a
         // delete rebuilds from this, so truncation would silently lose tracks (§10/§11).
@@ -196,14 +170,7 @@ public sealed class PlaylistClient(InnerTubeTransport transport, ILogger<Playlis
                 new Dictionary<string, object?> { ["continuation"] = token }, ct).ConfigureAwait(false);
 
             var before = items.Count;
-            foreach (var array in ContinuationPaging.FindItemArrays(page))
-            {
-                foreach (var item in array.EnumerateArray())
-                {
-                    TryAddPlaylistItem(item, items);
-                }
-            }
-
+            PlaylistResponseParser.CollectPlaylistItemsPage(page, items);
             token = ContinuationPaging.FindToken(page);
             if (items.Count == before)
             {
@@ -218,80 +185,6 @@ public sealed class PlaylistClient(InnerTubeTransport transport, ILogger<Playlis
         }
 
         return items;
-    }
-
-    /// <summary>Recursively finds musicPlaylistShelfRenderer contents — resilient to wrapper renames.</summary>
-    private static void CollectPlaylistItems(JsonElement node, List<PlaylistItem> items)
-    {
-        switch (node.ValueKind)
-        {
-            case JsonValueKind.Object:
-                if (node.Get("musicPlaylistShelfRenderer", "contents") is { } contents)
-                {
-                    foreach (var item in contents.EnumerateArray())
-                    {
-                        TryAddPlaylistItem(item, items);
-                    }
-
-                    return;
-                }
-
-                foreach (var property in node.EnumerateObject())
-                {
-                    CollectPlaylistItems(property.Value, items);
-                }
-
-                break;
-
-            case JsonValueKind.Array:
-                foreach (var item in node.EnumerateArray())
-                {
-                    CollectPlaylistItems(item, items);
-                }
-
-                break;
-        }
-    }
-
-    private static void TryAddPlaylistItem(JsonElement item, List<PlaylistItem> items)
-    {
-        var data = item.Get("musicResponsiveListItemRenderer", "playlistItemData");
-        var videoId = data?.GetString("videoId");
-        var setVideoId = data?.GetString("playlistSetVideoId");
-        if (!string.IsNullOrEmpty(videoId) && !string.IsNullOrEmpty(setVideoId))
-        {
-            items.Add(new PlaylistItem(videoId, setVideoId));
-        }
-    }
-
-    private static void CollectLibraryPlaylists(JsonElement root, List<PlaylistSummary> results)
-    {
-        foreach (var tab in root.GetArray("contents", "singleColumnBrowseResultsRenderer", "tabs"))
-        {
-            foreach (var section in tab.GetArray("tabRenderer", "content", "sectionListRenderer", "contents"))
-            {
-                foreach (var item in section.GetArray("gridRenderer", "items"))
-                {
-                    TryAddLibraryPlaylist(item, results);
-                }
-            }
-        }
-    }
-
-    private static void TryAddLibraryPlaylist(JsonElement item, List<PlaylistSummary> results)
-    {
-        if (item.Get("musicTwoRowItemRenderer") is not { } renderer)
-        {
-            return;
-        }
-
-        var browseId = renderer.GetString("navigationEndpoint", "browseEndpoint", "browseId") ?? "";
-        var title = renderer.JoinRuns("title");
-        if (browseId.StartsWith("VL", StringComparison.Ordinal) && title.Length > 0 &&
-            !results.Any(p => p.PlaylistId == browseId[2..]))
-        {
-            results.Add(new PlaylistSummary(browseId[2..], title, 0));
-        }
     }
 
     private static string StripVl(string playlistId) =>

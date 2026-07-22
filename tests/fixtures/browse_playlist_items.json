@@ -1,0 +1,8 @@
+{
+  "contents": { "singleColumnBrowseResultsRenderer": { "tabs": [ { "tabRenderer": { "content": { "sectionListRenderer": { "contents": [
+    { "musicPlaylistShelfRenderer": { "contents": [
+      { "musicResponsiveListItemRenderer": { "playlistItemData": { "videoId": "pvid1", "playlistSetVideoId": "PSET1" } } },
+      { "musicResponsiveListItemRenderer": { "playlistItemData": { "videoId": "pvid2", "playlistSetVideoId": "PSET2" } } }
+    ] } }
+  ] } } } } ] } }
+}

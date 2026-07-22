@@ -1,0 +1,7 @@
+{
+  "status": "STATUS_SUCCEEDED",
+  "playlistEditResults": [
+    { "playlistEditVideoAddedResultData": { "videoId": "vidAAA", "setVideoId": "SETAAA" } },
+    { "playlistEditVideoAddedResultData": { "videoId": "vidBBB", "setVideoId": "SETBBB" } }
+  ]
+}
