@@ -17,6 +17,27 @@ public sealed class NullMetadataEnricher : IMetadataEnricher
 }
 
 /// <summary>
+/// Runs several enrichers in order, most reliable first (audio fingerprint, then
+/// cover recognition). Each only acts when the track still needs help, so once
+/// one recovers the artist/title the rest are effectively skipped.
+/// </summary>
+public sealed class CompositeMetadataEnricher(IEnumerable<IMetadataEnricher> enrichers) : IMetadataEnricher
+{
+    private readonly IReadOnlyList<IMetadataEnricher> _enrichers = enrichers.ToList();
+
+    public async Task<TrackInfo> EnrichAsync(TrackInfo track, CancellationToken ct = default)
+    {
+        foreach (var enricher in _enrichers)
+        {
+            ct.ThrowIfCancellationRequested();
+            track = await enricher.EnrichAsync(track, ct).ConfigureAwait(false);
+        }
+
+        return track;
+    }
+}
+
+/// <summary>
 /// "Shazam-style" recognition (§8-adjacent): when a track's metadata is weak
 /// (no artist, or derived from the filename), fingerprint the audio with
 /// Chromaprint and look it up on AcoustID to recover the real artist + title,

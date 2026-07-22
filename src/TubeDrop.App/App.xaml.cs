@@ -61,7 +61,6 @@ public partial class App : Application
                     _ => new Core.Matching.Refiners.LocalModelProvider());
                 services.AddSingleton<Core.Matching.IQueryRefiner, Core.Matching.Refiners.DeterministicRefiner>();
                 services.AddSingleton<Core.Matching.IQueryRefiner, Core.Matching.Refiners.OnnxQueryRefiner>();
-                services.AddSingleton<Core.Matching.IQueryRefiner, Core.Matching.Refiners.CoverImageRefiner>();
                 services.AddSingleton<Core.Matching.IQueryRefiner, Core.Matching.Refiners.CloudQueryRefiner>();
 
                 services.AddSingleton<Core.Matching.MatchingEngine>(sp => new Core.Matching.MatchingEngine(
@@ -74,10 +73,19 @@ public partial class App : Application
                 services.AddSingleton<Core.Fingerprint.IAudioFingerprinter>(
                     _ => new Core.Fingerprint.FpcalcFingerprinter());
                 services.AddSingleton<Core.Fingerprint.IAcoustIdClient, Core.Fingerprint.AcoustIdClient>();
-                services.AddSingleton<Core.Fingerprint.IMetadataEnricher, Core.Fingerprint.AcoustIdEnricher>();
-
                 // Keyless cover reverse-image lookup (Google Lens via the WebView2 session).
                 services.AddSingleton<Core.Cover.ICoverImageLookup, Services.WebView2CoverImageLookup>();
+
+                // Recognize-first: for weak-metadata tracks, determine the artist up
+                // front (audio fingerprint, then cover) BEFORE searching. Order matters.
+                services.AddSingleton<Core.Fingerprint.AcoustIdEnricher>();
+                services.AddSingleton<Core.Cover.CoverArtEnricher>();
+                services.AddSingleton<Core.Fingerprint.IMetadataEnricher>(sp =>
+                    new Core.Fingerprint.CompositeMetadataEnricher(new Core.Fingerprint.IMetadataEnricher[]
+                    {
+                        sp.GetRequiredService<Core.Fingerprint.AcoustIdEnricher>(),
+                        sp.GetRequiredService<Core.Cover.CoverArtEnricher>(),
+                    }));
                 services.AddSingleton<Services.ISkinManager>(_ => new Services.SkinManager(Current));
                 services.AddSingleton<Services.LocalizationService>();
                 services.AddSingleton<Services.UpdateService>();

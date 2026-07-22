@@ -73,8 +73,14 @@ public sealed class MatchingEngine(
         string? bestQuery = null;
         string? bestRefiner = null;
 
+        // With no artist to anchor a generic title, the first (title-only) query
+        // can lock onto a same-title wrong song. So for no-artist tracks we don't
+        // stop at the first over-threshold hit — we score every query's results
+        // and keep the global best.
+        var evaluateAll = string.IsNullOrWhiteSpace(track.Artist);
+
         // 1) Base queries (§7).
-        var (best, query) = await TryQueriesAsync(QueryBuilder.Build(track), track, options, ct)
+        var (best, query) = await TryQueriesAsync(QueryBuilder.Build(track), track, options, evaluateAll, ct)
             .ConfigureAwait(false);
         if (best is not null && best.Score >= options.Threshold)
         {
@@ -93,7 +99,7 @@ public sealed class MatchingEngine(
                 continue;
             }
 
-            var (refinedBest, refinedQuery) = await TryQueriesAsync(refined, track, options, ct)
+            var (refinedBest, refinedQuery) = await TryQueriesAsync(refined, track, options, evaluateAll, ct)
                 .ConfigureAwait(false);
             if (refinedBest is not null && refinedBest.Score >= options.Threshold)
             {
@@ -126,6 +132,7 @@ public sealed class MatchingEngine(
         IReadOnlyList<string> queries,
         TrackInfo track,
         MatchingOptions options,
+        bool evaluateAll,
         CancellationToken ct)
     {
         ScoredCandidate? best = null;
@@ -145,8 +152,10 @@ public sealed class MatchingEngine(
                 }
             }
 
-            // Good enough — no need to burn more queries for this track.
-            if (best is not null && best.Score >= options.Threshold)
+            // Fast path (track has an artist): stop as soon as one query is good
+            // enough. For no-artist tracks (evaluateAll) keep scoring every query
+            // and return the global best, so a wrong same-title hit can't win first.
+            if (!evaluateAll && best is not null && best.Score >= options.Threshold)
             {
                 return (best, bestQuery);
             }
