@@ -59,6 +59,9 @@ public partial class App : Application
                 // deterministic -> onnx (no-op no-go) -> cloud (opt-in).
                 services.AddSingleton<Core.Matching.Refiners.IModelProvider>(
                     _ => new Core.Matching.Refiners.LocalModelProvider());
+                // Cover is the prioritized fallback: after the plain title search,
+                // it's tried FIRST, before the deterministic/cloud rungs.
+                services.AddSingleton<Core.Matching.IQueryRefiner, Core.Matching.Refiners.CoverImageRefiner>();
                 services.AddSingleton<Core.Matching.IQueryRefiner, Core.Matching.Refiners.DeterministicRefiner>();
                 services.AddSingleton<Core.Matching.IQueryRefiner, Core.Matching.Refiners.OnnxQueryRefiner>();
                 services.AddSingleton<Core.Matching.IQueryRefiner, Core.Matching.Refiners.CloudQueryRefiner>();
@@ -76,16 +79,8 @@ public partial class App : Application
                 // Keyless cover reverse-image lookup (Google Lens via the WebView2 session).
                 services.AddSingleton<Core.Cover.ICoverImageLookup, Services.WebView2CoverImageLookup>();
 
-                // Recognize-first: for weak-metadata tracks, determine the artist up
-                // front (audio fingerprint, then cover) BEFORE searching. Order matters.
-                services.AddSingleton<Core.Fingerprint.AcoustIdEnricher>();
-                services.AddSingleton<Core.Cover.CoverArtEnricher>();
-                services.AddSingleton<Core.Fingerprint.IMetadataEnricher>(sp =>
-                    new Core.Fingerprint.CompositeMetadataEnricher(new Core.Fingerprint.IMetadataEnricher[]
-                    {
-                        sp.GetRequiredService<Core.Fingerprint.AcoustIdEnricher>(),
-                        sp.GetRequiredService<Core.Cover.CoverArtEnricher>(),
-                    }));
+                // Audio fingerprint recognition runs before matching (opt-in, weak tags only).
+                services.AddSingleton<Core.Fingerprint.IMetadataEnricher, Core.Fingerprint.AcoustIdEnricher>();
                 services.AddSingleton<Services.ISkinManager>(_ => new Services.SkinManager(Current));
                 services.AddSingleton<Services.LocalizationService>();
                 services.AddSingleton<Services.UpdateService>();

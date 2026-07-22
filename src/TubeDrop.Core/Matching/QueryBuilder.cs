@@ -45,19 +45,20 @@ public static class QueryBuilder
             Add($"{artist} {title}");
             Add($"{title} {artist}");
         }
-        else if (track.Genre.Length > 0)
+
+        // The bare title (from the file name) is the primary query — tried first.
+        Add(title);
+
+        // No artist to anchor a generic title → add the genre AFTER the bare title
+        // as a secondary hint (duration then disambiguates); never before it.
+        if (artist.Length == 0 && track.Genre.Length > 0)
         {
-            // No artist to anchor a generic title (e.g. "Hurricane"): try the genre
-            // FIRST, so the right-style candidate is found before a same-title song
-            // of a different genre can lock in. Duration then disambiguates.
             var genre = FilenameHeuristics.CleanNoise(PrimaryGenre(track.Genre));
             if (genre.Length > 0)
             {
                 Add($"{title} {genre}");
             }
         }
-
-        Add(title);
 
         // Transliterated variants only when they differ (non-Latin scripts).
         if (nonLatin)
