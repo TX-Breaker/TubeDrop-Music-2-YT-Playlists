@@ -73,6 +73,18 @@
   <data name="Home_Reset"><value>Reimposta</value></data>
   <data name="Home_Refresh"><value>Aggiorna</value></data>
   <data name="Home_PickPlaylist"><value>Scegli una playlist</value></data>
+  <data name="Home_DropHere"><value>Trascina la tua musica</value></data>
+  <data name="Home_DropFormats"><value>MP3 · FLAC · M4A · WAV · o un'intera cartella</value></data>
+  <data name="Home_Scanning"><value>Scansione…</value></data>
+  <data name="Home_TracksReady"><value>{0} traccia/e pronte</value></data>
+  <data name="Home_NoAudio"><value>Nessun file audio trovato.</value></data>
+  <data name="Home_Clear"><value>Svuota</value></data>
+  <data name="Home_Start"><value>Crea playlist</value></data>
+  <data name="Home_StartAppend"><value>Aggiungi a playlist</value></data>
+  <data name="Home_RemoveTrack"><value>Rimuovi questa traccia</value></data>
+  <data name="Home_Private"><value>Privata</value></data>
+  <data name="Home_Unlisted"><value>Non in elenco</value></data>
+  <data name="Home_Public"><value>Pubblica</value></data>
 
   <data name="Settings_Title"><value>Impostazioni</value></data>
   <data name="Settings_Appearance"><value>Aspetto</value></data>

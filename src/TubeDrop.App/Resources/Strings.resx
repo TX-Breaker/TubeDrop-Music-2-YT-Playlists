@@ -73,6 +73,18 @@
   <data name="Home_Reset"><value>Reset</value></data>
   <data name="Home_Refresh"><value>Refresh</value></data>
   <data name="Home_PickPlaylist"><value>Pick a playlist</value></data>
+  <data name="Home_DropHere"><value>Drop your music</value></data>
+  <data name="Home_DropFormats"><value>MP3 · FLAC · M4A · WAV · or an entire folder</value></data>
+  <data name="Home_Scanning"><value>Scanning…</value></data>
+  <data name="Home_TracksReady"><value>{0} track(s) ready</value></data>
+  <data name="Home_NoAudio"><value>No audio files found in the drop.</value></data>
+  <data name="Home_Clear"><value>Clear</value></data>
+  <data name="Home_Start"><value>Create playlist</value></data>
+  <data name="Home_StartAppend"><value>Add to playlist</value></data>
+  <data name="Home_RemoveTrack"><value>Remove this track</value></data>
+  <data name="Home_Private"><value>Private</value></data>
+  <data name="Home_Unlisted"><value>Unlisted</value></data>
+  <data name="Home_Public"><value>Public</value></data>
 
   <data name="Settings_Title"><value>Settings</value></data>
   <data name="Settings_Appearance"><value>Appearance</value></data>

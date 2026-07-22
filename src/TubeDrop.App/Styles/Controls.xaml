@@ -1,0 +1,123 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <!-- Shared component styles matching the design reference (§12.1).
+       Colours/radii come only from the active skin via DynamicResource. -->
+
+  <!-- Segmented-control container -->
+  <Style x:Key="TubeDrop.SegmentBar" TargetType="Border">
+    <Setter Property="Background" Value="{DynamicResource TubeDrop.Brush.Card2}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource TubeDrop.Brush.Stroke}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource TubeDrop.Radius.Md}" />
+    <Setter Property="Padding" Value="3" />
+  </Style>
+
+  <!-- A single segment (RadioButton styled as a pill) -->
+  <Style x:Key="TubeDrop.Segment" TargetType="RadioButton">
+    <Setter Property="Foreground" Value="{DynamicResource TubeDrop.Brush.Text2}" />
+    <Setter Property="FontSize" Value="12.5" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="RadioButton">
+          <Border x:Name="Bd" CornerRadius="{DynamicResource TubeDrop.Radius.Sm}"
+                  Background="Transparent" Padding="13,6">
+            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Bd" Property="Background" Value="{DynamicResource TubeDrop.Brush.Card3}" />
+            </Trigger>
+            <Trigger Property="IsChecked" Value="True">
+              <Setter TargetName="Bd" Property="Background" Value="{DynamicResource TubeDrop.Brush.Card3}" />
+              <Setter Property="Foreground" Value="{DynamicResource TubeDrop.Brush.Text}" />
+              <Setter Property="FontWeight" Value="SemiBold" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- Accent primary button -->
+  <Style x:Key="TubeDrop.PrimaryButton" TargetType="Button">
+    <Setter Property="Foreground" Value="{DynamicResource TubeDrop.Brush.OnAccent}" />
+    <Setter Property="Background" Value="{DynamicResource TubeDrop.Brush.Accent}" />
+    <Setter Property="FontSize" Value="15" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Height" Value="46" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Button">
+          <Border x:Name="Bd" CornerRadius="{DynamicResource TubeDrop.Radius.Md}"
+                  Background="{TemplateBinding Background}" Padding="24,0">
+            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Bd" Property="Background" Value="{DynamicResource TubeDrop.Brush.AccentHi}" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+              <Setter TargetName="Bd" Property="Background" Value="{DynamicResource TubeDrop.Brush.Card3}" />
+              <Setter Property="Foreground" Value="{DynamicResource TubeDrop.Brush.Text3}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- Subtle/ghost button -->
+  <Style x:Key="TubeDrop.GhostButton" TargetType="Button">
+    <Setter Property="Foreground" Value="{DynamicResource TubeDrop.Brush.Text2}" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="FontSize" Value="12.5" />
+    <Setter Property="Height" Value="30" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Button">
+          <Border x:Name="Bd" CornerRadius="{DynamicResource TubeDrop.Radius.Sm}"
+                  Background="{TemplateBinding Background}"
+                  BorderBrush="{DynamicResource TubeDrop.Brush.Stroke}" BorderThickness="1"
+                  Padding="12,0">
+            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Bd" Property="Background" Value="{DynamicResource TubeDrop.Brush.Card2}" />
+              <Setter Property="Foreground" Value="{DynamicResource TubeDrop.Brush.Text}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- Small round icon button (e.g. remove a track) -->
+  <Style x:Key="TubeDrop.IconButton" TargetType="Button">
+    <Setter Property="Foreground" Value="{DynamicResource TubeDrop.Brush.Text3}" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Width" Value="28" />
+    <Setter Property="Height" Value="28" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Button">
+          <Border x:Name="Bd" CornerRadius="6" Background="{TemplateBinding Background}">
+            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Bd" Property="Background" Value="{DynamicResource TubeDrop.Brush.Card2}" />
+              <Setter Property="Foreground" Value="{DynamicResource TubeDrop.Brush.Bad}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+</ResourceDictionary>

@@ -16,6 +16,7 @@
   <Color x:Key="TubeDrop.Color.AccentHi">#FFFF4D68</Color>
   <Color x:Key="TubeDrop.Color.AccentSoft">#24FF2E4D</Color>
   <Color x:Key="TubeDrop.Color.OnAccent">#FFFFFFFF</Color>
+  <Color x:Key="TubeDrop.Color.OnAccentBadge">#40FFFFFF</Color>
   <Color x:Key="TubeDrop.Color.Good">#FF41C983</Color>
   <Color x:Key="TubeDrop.Color.Warn">#FFE6AC37</Color>
   <Color x:Key="TubeDrop.Color.Bad">#FFFF5A63</Color>
@@ -36,6 +37,7 @@
   <SolidColorBrush x:Key="TubeDrop.Brush.AccentHi" Color="{StaticResource TubeDrop.Color.AccentHi}" />
   <SolidColorBrush x:Key="TubeDrop.Brush.AccentSoft" Color="{StaticResource TubeDrop.Color.AccentSoft}" />
   <SolidColorBrush x:Key="TubeDrop.Brush.OnAccent" Color="{StaticResource TubeDrop.Color.OnAccent}" />
+  <SolidColorBrush x:Key="TubeDrop.Brush.OnAccentBadge" Color="{StaticResource TubeDrop.Color.OnAccentBadge}" />
   <SolidColorBrush x:Key="TubeDrop.Brush.Good" Color="{StaticResource TubeDrop.Color.Good}" />
   <SolidColorBrush x:Key="TubeDrop.Brush.Warn" Color="{StaticResource TubeDrop.Color.Warn}" />
   <SolidColorBrush x:Key="TubeDrop.Brush.Bad" Color="{StaticResource TubeDrop.Color.Bad}" />

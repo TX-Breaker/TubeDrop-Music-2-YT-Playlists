@@ -10,7 +10,7 @@ using TubeDrop.Core.Settings;
 
 namespace TubeDrop.App.ViewModels;
 
-public sealed record TrackRow(string Display, string Detail);
+public sealed record TrackRow(string SourcePath, string Display, string Detail, string? Initials);
 
 /// <summary>Raised when the user commits a drop and target to start the batch.</summary>
 public sealed record StartBatchRequest(
@@ -27,14 +27,19 @@ public partial class HomeViewModel : ObservableObject
     private readonly ISettingsStore _settings;
     private readonly IPlaylistClient _playlistClient;
     private readonly AuthService _authService;
+    private readonly LocalizationService _loc;
     private readonly ILogger<HomeViewModel> _logger;
 
     /// <summary>All paths dropped so far this session — drops accumulate (drop songs one by one).</summary>
     private readonly List<string> _accumulatedPaths = [];
 
-    [ObservableProperty] private string _statusText = "Drop audio files or folders here";
+    /// <summary>Source paths the user removed by hand — excluded from the list and the batch.</summary>
+    private readonly HashSet<string> _removedPaths = new(StringComparer.OrdinalIgnoreCase);
+
     [ObservableProperty] private bool _isScanning;
     [ObservableProperty] private bool _hasFiles;
+    [ObservableProperty] private string _summary = "";
+    [ObservableProperty] private int _trackCount;
 
     // Target picker (§9)
     [ObservableProperty] private bool _createNew = true;
@@ -56,9 +61,8 @@ public partial class HomeViewModel : ObservableObject
     public ObservableCollection<TrackRow> Tracks { get; } = [];
     public ObservableCollection<PlaylistSummary> ExistingPlaylists { get; } = [];
     public Array Privacies { get; } = Enum.GetValues<PlaylistPrivacy>();
-    public Array FolderModes { get; } = Enum.GetValues<FolderNameMode>();
 
-    public IngestResult? LastResult { get; private set; }
+    private IngestResult? _lastResult;
     public IReadOnlyList<string> LastDroppedPaths => _accumulatedPaths;
 
     public event EventHandler<StartBatchRequest>? BatchRequested;
@@ -68,18 +72,33 @@ public partial class HomeViewModel : ObservableObject
         ISettingsStore settings,
         IPlaylistClient playlistClient,
         AuthService authService,
+        LocalizationService loc,
         ILogger<HomeViewModel> logger)
     {
         _ingestPipeline = ingestPipeline;
         _settings = settings;
         _playlistClient = playlistClient;
         _authService = authService;
+        _loc = loc;
         _logger = logger;
         _privacy = settings.Current.DefaultPrivacy;
+
+        // Re-emit localized/computed labels when the UI language changes at runtime.
+        _loc.PropertyChanged += (_, _) =>
+        {
+            OnPropertyChanged(nameof(StartButtonText));
+            if (HasFiles)
+            {
+                RebuildSummary();
+            }
+        };
     }
 
     public bool CanStart => HasFiles && !IsScanning &&
         (CreateNew || SelectedExistingPlaylist is not null);
+
+    /// <summary>Localized primary-button label — differs for create vs append.</summary>
+    public string StartButtonText => CreateNew ? _loc["Home_Start"] : _loc["Home_StartAppend"];
 
     [RelayCommand]
     private async Task HandleDropAsync(IReadOnlyList<string> paths) => await AddPathsAsync(paths);
@@ -92,7 +111,6 @@ public partial class HomeViewModel : ObservableObject
             return;
         }
 
-        // Accumulate so users can drop songs one at a time.
         _accumulatedPaths.AddRange(paths);
         await RescanAsync();
     }
@@ -100,28 +118,16 @@ public partial class HomeViewModel : ObservableObject
     private async Task RescanAsync()
     {
         IsScanning = true;
-        StatusText = "Scanning…";
         try
         {
             var snapshot = _accumulatedPaths.ToList();
-            var result = await Task.Run(() => _ingestPipeline.Ingest(snapshot));
-            LastResult = result;
-
-            Tracks.Clear();
-            foreach (var track in result.Tracks)
-            {
-                var display = track.Artist.Length > 0 ? $"{track.Artist} — {track.Title}" : track.Title;
-                var duration = TimeSpan.FromSeconds(track.DurationSeconds).ToString(@"m\:ss");
-                var origin = track.Origin == TrackMetadataOrigin.FilenameHeuristics ? " · from filename" : "";
-                Tracks.Add(new TrackRow(display, $"{duration}{origin} · {Path.GetFileName(track.SourcePath)}"));
-            }
-
-            HasFiles = Tracks.Count > 0;
-            StatusText = BuildSummary(result);
+            _lastResult = await Task.Run(() => _ingestPipeline.Ingest(snapshot));
+            RebuildTrackList();
             UpdateFolderNaming();
             _logger.LogInformation(
                 "Ingested {Tracks} tracks ({Duplicates} duplicates, {Skipped} skipped, {Missing} missing, {Errors} errors)",
-                result.Tracks.Count, result.DuplicateCount, result.SkippedCount, result.MissingCount, result.ErrorCount);
+                _lastResult.Tracks.Count, _lastResult.DuplicateCount, _lastResult.SkippedCount,
+                _lastResult.MissingCount, _lastResult.ErrorCount);
         }
         finally
         {
@@ -130,23 +136,91 @@ public partial class HomeViewModel : ObservableObject
         }
     }
 
+    private void RebuildTrackList()
+    {
+        Tracks.Clear();
+        if (_lastResult is null)
+        {
+            HasFiles = false;
+            TrackCount = 0;
+            return;
+        }
+
+        foreach (var track in _lastResult.Tracks.Where(t => !_removedPaths.Contains(t.SourcePath)))
+        {
+            var display = track.Artist.Length > 0 ? $"{track.Artist} — {track.Title}" : track.Title;
+            var duration = TimeSpan.FromSeconds(track.DurationSeconds).ToString(@"m\:ss");
+            var origin = track.Origin == TrackMetadataOrigin.FilenameHeuristics ? " · from filename" : "";
+            Tracks.Add(new TrackRow(track.SourcePath, display,
+                $"{duration}{origin} · {Path.GetFileName(track.SourcePath)}", Initials(track)));
+        }
+
+        TrackCount = Tracks.Count;
+        HasFiles = Tracks.Count > 0;
+        RebuildSummary();
+    }
+
+    private void RebuildSummary()
+    {
+        if (_lastResult is null || TrackCount == 0)
+        {
+            Summary = _loc["Home_NoAudio"];
+            return;
+        }
+
+        var parts = new List<string> { string.Format(_loc["Home_TracksReady"], TrackCount) };
+        if (_lastResult.DuplicateCount > 0)
+        {
+            parts.Add($"{_lastResult.DuplicateCount} × dup");
+        }
+
+        if (_lastResult.SkippedCount > 0)
+        {
+            parts.Add($"{_lastResult.SkippedCount} skip");
+        }
+
+        if (_lastResult.ErrorCount > 0)
+        {
+            parts.Add($"{_lastResult.ErrorCount} err");
+        }
+
+        Summary = string.Join(" · ", parts);
+    }
+
+    [RelayCommand]
+    private void RemoveTrack(TrackRow? row)
+    {
+        if (row is null)
+        {
+            return;
+        }
+
+        _removedPaths.Add(row.SourcePath);
+        RebuildTrackList();
+        UpdateFolderNaming();
+        NotifyStartState();
+    }
+
     [RelayCommand]
     private void Reset()
     {
         _accumulatedPaths.Clear();
+        _removedPaths.Clear();
+        _lastResult = null;
         Tracks.Clear();
-        LastResult = null;
         HasFiles = false;
+        TrackCount = 0;
         NameFromFolder = false;
         FolderNamingAvailable = false;
         DerivedFolderNote = null;
         PlaylistName = "";
-        StatusText = "Drop audio files or folders here";
+        Summary = "";
         NotifyStartState();
     }
 
     partial void OnCreateNewChanged(bool value)
     {
+        OnPropertyChanged(nameof(StartButtonText));
         NotifyStartState();
         if (!value && ExistingPlaylists.Count == 0)
         {
@@ -194,18 +268,21 @@ public partial class HomeViewModel : ObservableObject
 
     private void UpdateFolderNaming()
     {
-        if (LastResult is null)
+        if (_lastResult is null)
         {
             return;
         }
 
-        var derived = FolderNameDeriver.Derive(
-            _accumulatedPaths, LastResult.Tracks.Select(t => t.SourcePath).ToList(), FolderMode);
+        var effectivePaths = _lastResult.Tracks
+            .Where(t => !_removedPaths.Contains(t.SourcePath))
+            .Select(t => t.SourcePath)
+            .ToList();
+        var derived = FolderNameDeriver.Derive(_accumulatedPaths, effectivePaths, FolderMode);
 
         FolderNamingAvailable = derived.Name is not null;
         if (!FolderNamingAvailable && NameFromFolder)
         {
-            NameFromFolder = false; // loose files → toggle auto-disables (§9)
+            NameFromFolder = false;
             DerivedFolderNote = "No folder to name after — dropped loose files.";
             return;
         }
@@ -222,14 +299,22 @@ public partial class HomeViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanStart))]
     private void StartBatch()
     {
-        if (LastResult is null)
+        if (_lastResult is null)
         {
             return;
         }
 
+        // Honour manual removals: the batch sees only the kept tracks.
+        var keptTracks = _lastResult.Tracks.Where(t => !_removedPaths.Contains(t.SourcePath)).ToList();
+        if (keptTracks.Count == 0)
+        {
+            return;
+        }
+
+        var effective = _lastResult with { Tracks = keptTracks };
         var title = PlaylistName.Trim().Length > 0 ? PlaylistName.Trim() : "TubeDrop playlist";
         BatchRequested?.Invoke(this, new StartBatchRequest(
-            LastResult, CreateNew,
+            effective, CreateNew,
             CreateNew ? null : SelectedExistingPlaylist?.PlaylistId,
             title, PlaylistDescription, Privacy));
     }
@@ -240,34 +325,15 @@ public partial class HomeViewModel : ObservableObject
         StartBatchCommand.NotifyCanExecuteChanged();
     }
 
-    private static string BuildSummary(IngestResult result)
+    private static string Initials(TrackInfo track)
     {
-        if (result.Tracks.Count == 0)
+        var source = track.Artist.Length > 0 ? track.Artist : track.Title;
+        var words = source.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return words.Length switch
         {
-            return "No audio files found in the drop.";
-        }
-
-        var parts = new List<string> { $"{result.Tracks.Count} track(s) ready" };
-        if (result.DuplicateCount > 0)
-        {
-            parts.Add($"{result.DuplicateCount} duplicate(s)");
-        }
-
-        if (result.SkippedCount > 0)
-        {
-            parts.Add($"{result.SkippedCount} skipped");
-        }
-
-        if (result.MissingCount > 0)
-        {
-            parts.Add($"{result.MissingCount} missing");
-        }
-
-        if (result.ErrorCount > 0)
-        {
-            parts.Add($"{result.ErrorCount} unreadable");
-        }
-
-        return string.Join(" · ", parts);
+            0 => "♪",
+            1 => words[0][..Math.Min(2, words[0].Length)].ToUpperInvariant(),
+            _ => $"{char.ToUpperInvariant(words[0][0])}{char.ToUpperInvariant(words[1][0])}",
+        };
     }
 }
