@@ -38,6 +38,11 @@ public sealed class InnerTubeTransport
     private int _consecutiveFailures;
     private DateTimeOffset _circuitOpenUntil = DateTimeOffset.MinValue;
 
+    // Lazily-bootstrapped WEB (www.youtube.com) ytcfg — the login only captures music's.
+    private readonly SemaphoreSlim _webYtcfgGate = new(1, 1);
+    private string? _webApiKey;
+    private JsonElement? _webContext;
+
     /// <summary>When set, every response body is dumped (sanitized) to this directory.</summary>
     public string? CaptureDirectory { get; set; }
 
@@ -69,8 +74,20 @@ public sealed class InnerTubeTransport
                       ?? throw new InnerTubeException("Not signed in");
 
         var isMusic = origin == MusicOrigin;
-        var apiKey = isMusic ? session.MusicApiKey : session.WebApiKey;
-        var context = isMusic ? session.MusicContext : session.WebContext;
+        string? apiKey;
+        JsonElement? context;
+        if (isMusic)
+        {
+            apiKey = session.MusicApiKey;
+            context = session.MusicContext;
+        }
+        else
+        {
+            // The login only captures the WEB_REMIX (music) ytcfg. For plain
+            // YouTube (WEB) searches, fetch the WEB ytcfg on first use and cache it.
+            (apiKey, context) = await EnsureWebYtcfgAsync(session, cancellationToken).ConfigureAwait(false);
+        }
+
         if (string.IsNullOrEmpty(apiKey) || context is null)
         {
             throw new InnerTubeException($"No ytcfg captured for {origin}");
@@ -163,6 +180,81 @@ public sealed class InnerTubeTransport
                 return root;
             }
         }
+    }
+
+    /// <summary>
+    /// Returns the WEB ytcfg (api key + a minimal WEB client context), fetching it
+    /// from www.youtube.com once and caching it. Prefers the session's captured
+    /// values if present, else the login-supplied WEB values, else a live fetch.
+    /// </summary>
+    private async Task<(string? ApiKey, JsonElement? Context)> EnsureWebYtcfgAsync(
+        InnerTubeSession session, CancellationToken ct)
+    {
+        if (!string.IsNullOrEmpty(session.WebApiKey) && session.WebContext is not null)
+        {
+            return (session.WebApiKey, session.WebContext);
+        }
+
+        if (!string.IsNullOrEmpty(_webApiKey) && _webContext is not null)
+        {
+            return (_webApiKey, _webContext);
+        }
+
+        await _webYtcfgGate.WaitAsync(ct).ConfigureAwait(false);
+        try
+        {
+            if (!string.IsNullOrEmpty(_webApiKey) && _webContext is not null)
+            {
+                return (_webApiKey, _webContext);
+            }
+
+            using var request = new HttpRequestMessage(HttpMethod.Get, WebOrigin + "/");
+            request.Headers.TryAddWithoutValidation("Cookie", session.CookieHeader);
+            request.Headers.TryAddWithoutValidation("User-Agent",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36");
+            request.Headers.TryAddWithoutValidation("Accept-Language", "en-US,en;q=0.9");
+
+            using var response = await _httpClient.SendAsync(request, ct).ConfigureAwait(false);
+            var html = await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
+
+            var apiKey = Match(html, "\"INNERTUBE_API_KEY\":\"", "\"");
+            var clientVersion = Match(html, "\"INNERTUBE_CLIENT_VERSION\":\"", "\"");
+            if (apiKey is null || clientVersion is null)
+            {
+                _logger.LogWarning("Could not extract WEB ytcfg from www.youtube.com");
+                return (null, null);
+            }
+
+            // A minimal WEB client context is enough for search (verified via fixtures).
+            using var doc = JsonDocument.Parse(
+                $"{{\"client\":{{\"clientName\":\"WEB\",\"clientVersion\":\"{clientVersion}\",\"hl\":\"en\",\"gl\":\"US\"}}}}");
+            _webContext = doc.RootElement.Clone();
+            _webApiKey = apiKey;
+            _logger.LogInformation("Bootstrapped WEB ytcfg (client {Version})", clientVersion);
+            return (_webApiKey, _webContext);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "WEB ytcfg bootstrap failed");
+            return (null, null);
+        }
+        finally
+        {
+            _webYtcfgGate.Release();
+        }
+    }
+
+    private static string? Match(string haystack, string prefix, string suffix)
+    {
+        var start = haystack.IndexOf(prefix, StringComparison.Ordinal);
+        if (start < 0)
+        {
+            return null;
+        }
+
+        start += prefix.Length;
+        var end = haystack.IndexOf(suffix, start, StringComparison.Ordinal);
+        return end > start ? haystack[start..end] : null;
     }
 
     private static Task BackoffAsync(int attempt, CancellationToken ct) =>
