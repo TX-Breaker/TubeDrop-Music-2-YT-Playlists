@@ -1,0 +1,44 @@
+<Application x:Class="TubeDrop.App.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:vm="clr-namespace:TubeDrop.App.ViewModels"
+             xmlns:pages="clr-namespace:TubeDrop.App.Views.Pages"
+             xmlns:converters="clr-namespace:TubeDrop.App.Converters">
+  <Application.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <!-- WPF-UI chrome + controls -->
+        <ui:ThemesDictionary Theme="Dark" />
+        <ui:ControlsDictionary />
+        <!-- Default skin so TubeDrop.* keys resolve before SkinManager runs;
+             SkinManager swaps its own slot on top at startup (§12.1). -->
+        <ResourceDictionary Source="pack://application:,,,/TubeDrop;component/Skins/Mix.Dark.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+
+      <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+      <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" />
+      <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+      <converters:EnumEqualsConverter x:Key="EnumEqualsConverter" />
+      <converters:ConfidenceToTextConverter x:Key="ConfidenceToTextConverter" />
+      <converters:ResourceKeyToBrushConverter x:Key="ResourceKeyToBrushConverter" />
+
+      <!-- ViewModel -> View mapping for shell navigation -->
+      <DataTemplate DataType="{x:Type vm:HomeViewModel}">
+        <pages:HomePage />
+      </DataTemplate>
+      <DataTemplate DataType="{x:Type vm:QueueViewModel}">
+        <pages:QueuePage />
+      </DataTemplate>
+      <DataTemplate DataType="{x:Type vm:ReportViewModel}">
+        <pages:ReportPage />
+      </DataTemplate>
+      <DataTemplate DataType="{x:Type vm:ActivityViewModel}">
+        <pages:ActivityPage />
+      </DataTemplate>
+      <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
+        <pages:SettingsPage />
+      </DataTemplate>
+    </ResourceDictionary>
+  </Application.Resources>
+</Application>

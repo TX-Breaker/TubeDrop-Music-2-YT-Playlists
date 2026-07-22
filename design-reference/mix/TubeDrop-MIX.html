@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<!-- TubeDrop MIX v1 - Generated: 2026-07-22 01:06 (Europe/Rome)
+     Merge of Claude_Design (structure, 7 screens, folder-naming, dual theme, titlebar, tokens page)
+     + FIGMA draft (OLED palette, accent #e8294c, glass, live queue simulation, compact target bar).
+     Plain HTML/CSS/JS, zero dependencies: double-click to open. Reference for the WPF implementation. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TubeDrop - MIX design reference</title>
+<style>
+:root{
+  --bg:#080808;--surface:#101010;--card:#181818;--card2:#202020;--card3:#282828;
+  --stroke:rgba(255,255,255,.06);--stroke2:rgba(255,255,255,.11);
+  --text:#f0f0f0;--text2:#8f8f96;--text3:#55555c;
+  --accent:#e8294c;--accent-hi:#ff3d5f;--accent-soft:rgba(232,41,76,.12);
+  --good:#41c983;--warn:#e6ac37;--bad:#ff5a63;--info:#4aa3ff;
+  --rail:#0c0c0c;--glass:rgba(16,16,16,.82);
+}
+body.light{
+  --bg:#f4f4f6;--surface:#ffffff;--card:#ffffff;--card2:#ececef;--card3:#e2e2e6;
+  --stroke:rgba(0,0,0,.09);--stroke2:rgba(0,0,0,.15);
+  --text:#1a1a1c;--text2:#6b6b72;--text3:#a0a0a8;
+  --accent-soft:rgba(232,41,76,.10);
+  --rail:#ebebee;--glass:rgba(255,255,255,.85);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Segoe UI Variable Text','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased}
+::selection{background:rgba(232,41,76,.35)}
+button{font-family:inherit;cursor:pointer}
+input,select{font-family:inherit;font-size:13px;color:var(--text)}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-thumb{background:rgba(128,128,128,.25);border-radius:3px}
+a{color:var(--accent);text-decoration:none}
+
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes ring{0%{transform:scale(.7);opacity:.5}100%{transform:scale(1.5);opacity:0}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes stripe{from{background-position:0 0}to{background-position:32px 0}}
+@keyframes fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+@keyframes toastin{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
+@keyframes dzglow{0%,100%{box-shadow:0 0 0 0 rgba(232,41,76,0),inset 0 0 60px rgba(232,41,76,.04)}50%{box-shadow:0 0 44px 8px rgba(232,41,76,.14),inset 0 0 60px rgba(232,41,76,.08)}}
+@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+
+.app{height:100vh;display:flex;flex-direction:column}
+.titlebar{height:40px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 4px 0 14px;background:var(--glass);backdrop-filter:blur(18px) saturate(1.3);border-bottom:1px solid var(--stroke);gap:10px;z-index:5}
+.tb-l{display:flex;align-items:center;gap:9px;font-size:12.5px;font-weight:600}
+.tb-logo{width:18px;height:18px;border-radius:5px;background:var(--accent);display:flex;align-items:center;justify-content:center}
+.tb-sub{color:var(--text3);font-weight:400}
+.tb-r{display:flex;align-items:center;gap:2px}
+.tb-tool{height:26px;padding:0 10px;margin-right:6px;border:1px solid var(--stroke);background:transparent;color:var(--text2);border-radius:6px;font-size:11px}
+.tb-tool:hover{background:var(--card2)}
+.tb-win{width:44px;height:32px;border:none;background:transparent;color:var(--text2);border-radius:4px;font-size:12px}
+.tb-win:hover{background:var(--card2)}
+.tb-close:hover{background:#e81123;color:#fff}
+
+.body{flex:1;display:flex;min-height:0}
+.rail{width:78px;flex:none;background:var(--rail);border-right:1px solid var(--stroke);display:flex;flex-direction:column;padding:10px 8px;gap:2px}
+.nav{position:relative;height:56px;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:var(--text2);font-size:10.5px}
+.nav:hover{background:var(--card2)}
+.nav.on{color:var(--text);background:var(--accent-soft)}
+.nav .ind{position:absolute;left:2px;top:16px;bottom:16px;width:3px;border-radius:2px;background:var(--accent);opacity:0}
+.nav.on .ind{opacity:1}
+.rail-label{font-size:9px;letter-spacing:1.2px;color:var(--text3);text-align:center;margin:10px 0 6px;font-weight:600}
+.nav-mini{height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:10.5px;color:var(--text2)}
+.nav-mini:hover{background:var(--card2)}
+.nav-mini.on{color:var(--text);background:var(--accent-soft)}
+.rail-user{height:44px;border-radius:8px;display:flex;align-items:center;gap:8px;padding:0 8px;cursor:pointer;margin-top:8px;border-top:1px solid var(--stroke);padding-top:8px}
+.avatar{width:26px;height:26px;flex:none;border-radius:50%;background:linear-gradient(135deg,#5f3dc4,#e8590c);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff}
+
+.main{flex:1;min-width:0;display:flex;flex-direction:column;min-height:0}
+.banner{display:none;align-items:center;gap:12px;padding:10px 22px;font-size:13px;border-bottom:1px solid var(--stroke);animation:fadein .2s}
+.banner.on{display:flex}
+.banner.amber{background:rgba(230,172,55,.10);color:var(--warn)}
+.banner.blue{background:rgba(74,163,255,.10);color:var(--info)}
+.banner .dot{width:8px;height:8px;border-radius:50%;background:currentColor;flex:none}
+.banner span{flex:1}
+.banner button{height:28px;padding:0 14px;border:1px solid currentColor;background:transparent;color:inherit;border-radius:6px;font-size:12px;font-weight:600}
+.content{flex:1;overflow-y:auto;min-height:0;position:relative}
+.screen{display:none;animation:fadein .18s}
+.screen.on{display:block}
+
+.card{background:var(--card);border:1px solid var(--stroke);border-radius:12px}
+.seg{display:flex;gap:4px;background:var(--card2);border:1px solid var(--stroke);border-radius:8px;padding:3px}
+.seg .opt{height:30px;padding:0 13px;display:flex;align-items:center;border-radius:6px;font-size:12.5px;cursor:pointer;color:var(--text2);border:none;background:transparent}
+.seg .opt.on{background:var(--card3);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.chip{padding:5px 12px;border-radius:99px;font-size:11px;font-weight:500;border:1px solid var(--stroke);background:transparent;color:var(--text2)}
+.chip.on{background:rgba(232,41,76,.12);border-color:rgba(232,41,76,.4);color:var(--accent-hi)}
+.btn{height:36px;padding:0 16px;border-radius:8px;border:1px solid var(--stroke);background:transparent;color:var(--text2);font-size:13px}
+.btn:hover{background:var(--card2);color:var(--text)}
+.btn-primary{height:46px;padding:0 30px;border:none;border-radius:10px;background:var(--accent);color:#fff;font-size:15px;font-weight:600;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px -8px var(--accent);transition:transform .15s}
+.btn-primary:hover{background:var(--accent-hi);transform:translateY(-1px)}
+.btn-primary:disabled{opacity:.3;cursor:not-allowed;box-shadow:none;transform:none}
+.badge{background:rgba(255,255,255,.25);border-radius:20px;font-size:12px;padding:2px 9px;font-weight:700}
+.txt{height:42px;border:1px solid var(--stroke2);border-radius:9px;background:var(--surface);padding:0 14px;outline:none;width:100%}
+.txt:focus{border-color:rgba(232,41,76,.45)}
+.tgl{width:38px;height:22px;border-radius:99px;flex:none;cursor:pointer;background:var(--card3);position:relative;transition:background .2s;border:none}
+.tgl::after{content:'';width:16px;height:16px;border-radius:50%;background:#fff;position:absolute;top:3px;left:3px;transition:left .18s;box-shadow:0 1px 3px rgba(0,0,0,.4)}
+.tgl.on{background:var(--accent)}
+.tgl.on::after{left:19px}
+
+/* ---------- SIGN-IN ---------- */
+#signin .wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:48px 32px;background:radial-gradient(120% 90% at 50% -10%,var(--accent-soft),transparent 55%)}
+#signin .cols{display:flex;gap:52px;align-items:center;max-width:940px;flex-wrap:wrap;justify-content:center}
+#signin h1{font-size:30px;line-height:1.15;font-weight:700;margin:0 0 14px;letter-spacing:-.6px}
+#signin .lead{font-size:14.5px;color:var(--text2);margin:0 0 28px}
+.trust{display:flex;gap:11px;align-items:flex-start;margin-bottom:14px;font-size:13.5px}
+.trust .tick{width:20px;height:20px;flex:none;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:11px}
+.logincard{width:400px;max-width:100%;background:var(--card);border:1px solid var(--stroke);border-radius:14px;box-shadow:0 30px 80px -30px rgba(0,0,0,.6);overflow:hidden;padding:34px 30px;text-align:center}
+.gbtn{width:100%;height:46px;border-radius:9px;border:1px solid var(--stroke2);background:var(--surface);color:var(--text);font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:10px}
+.gbtn:hover{background:var(--card2)}
+
+/* ---------- HOME ---------- */
+#home .wrap{padding:34px 40px 40px;max-width:900px;margin:0 auto}
+.h-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:22px;gap:16px;flex-wrap:wrap}
+.h-head h1{font-size:24px;font-weight:700;letter-spacing:-.4px}
+.h-head p{font-size:13.5px;color:var(--text2);margin-top:4px}
+.dropzone{position:relative;border-radius:16px;border:2px dashed var(--stroke2);background:transparent;padding:52px 32px;display:flex;flex-direction:column;align-items:center;text-align:center;cursor:pointer;overflow:hidden;transition:border-color .2s,background .2s,transform .18s}
+.dropzone:hover{border-color:rgba(232,41,76,.35)}
+.dropzone.drag{border-color:var(--accent);background:radial-gradient(ellipse at center,rgba(232,41,76,.07) 0%,transparent 70%);animation:dzglow 1.2s ease-in-out infinite;transform:scale(1.008)}
+.dropzone .ringbox{position:absolute;inset:0;opacity:0;pointer-events:none;display:flex;align-items:center;justify-content:center}
+.dropzone.drag .ringbox{opacity:1}
+.dropzone .ring{width:200px;height:200px;border-radius:50%;border:2px solid var(--accent);animation:ring 1.2s ease-out infinite}
+.dz-ico{width:76px;height:76px;border-radius:20px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;margin-bottom:20px;animation:float 4s ease-in-out infinite}
+.dz-t{font-size:19px;font-weight:600;margin-bottom:6px}
+.dz-s{font-size:13.5px;color:var(--text2)}
+.readybar{display:none;align-items:center;gap:10px;margin-top:14px;padding:10px 14px;background:var(--accent-soft);border:1px solid rgba(232,41,76,.25);border-radius:9px;animation:fadein .2s}
+.readybar.on{display:flex}
+.readybar .n{width:26px;height:26px;border-radius:6px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.target{margin-top:22px;padding:18px}
+.target .modes{display:flex;gap:8px;margin-bottom:16px}
+.mode{flex:1;height:36px;display:flex;align-items:center;justify-content:center;gap:7px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid transparent;background:var(--card2);color:var(--text2)}
+.mode.on{background:var(--accent-soft);color:var(--accent-hi);border-color:rgba(232,41,76,.35)}
+.newrow{display:flex;gap:10px;align-items:center}
+.folderopt{display:flex;align-items:center;gap:12px;margin-top:12px;padding:11px 14px;background:var(--surface);border:1px solid var(--stroke);border-radius:9px}
+.folderopt .fo-t{font-size:13px;font-weight:500}
+.folderopt .fo-s{font-size:11.5px;color:var(--text2)}
+.fseg{display:none;gap:4px;background:var(--card2);border:1px solid var(--stroke);border-radius:8px;padding:3px;animation:fadein .18s}
+.fseg.on{display:flex}
+.fseg .fopt{padding:4px 12px;border-radius:6px;cursor:pointer;border:none;background:transparent;text-align:left;color:var(--text2)}
+.fseg .fopt.on{background:var(--card3);color:var(--text)}
+.fseg .fopt b{display:block;font-size:12px;font-weight:500;line-height:1.25}
+.fseg .fopt i{display:block;font-size:10px;color:var(--text3);font-style:normal;line-height:1.25}
+.pl-list{display:none;border:1px solid var(--stroke);border-radius:9px;background:var(--surface);overflow:hidden}
+.pl-list.on{display:block;animation:fadein .18s}
+.pl-search{height:42px;display:flex;align-items:center;padding:0 14px;gap:10px;border-bottom:1px solid var(--stroke);color:var(--text3);font-size:13.5px}
+.pl-row{height:52px;display:flex;align-items:center;gap:12px;padding:0 14px;cursor:pointer}
+.pl-row:hover{background:var(--card2)}
+.pl-row.sel{background:var(--accent-soft)}
+.pl-cov{width:36px;height:36px;border-radius:6px;flex:none}
+.h-foot{display:flex;justify-content:space-between;align-items:center;margin-top:20px;gap:14px;flex-wrap:wrap}
+.scopebox{display:flex;gap:6px;align-items:center;font-size:11px;color:var(--text3)}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="titlebar">
+    <div class="tb-l">
+      <div class="tb-logo"><svg viewBox="0 0 24 24" width="11" height="11" fill="#fff"><path d="M8 5v14l11-7z"/></svg></div>
+      <span>TubeDrop</span><span class="tb-sub" id="tb-sub">&mdash; Sign in</span>
+    </div>
+    <div class="tb-r">
+      <button class="tb-tool" onclick="cycleBanner()">&#9873; Preview state</button>
+      <button class="tb-tool" onclick="toggleTheme()" id="themebtn">&#9789; Dark</button>
+      <button class="tb-win">&#65123;</button>
+      <button class="tb-win">&#9634;</button>
+      <button class="tb-win tb-close">&#10005;</button>
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="rail">
+      <div class="nav" id="nv-home" onclick="nav('home')"><div class="ind"></div>
+        <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M4 11l8-6 8 6"/><path d="M6 10v9h5v-5h2v5h5v-9"/></svg>Home</div>
+      <div class="nav" id="nv-activity" onclick="nav('activity')"><div class="ind"></div>
+        <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2.5 7 5-15 2.5 8h4"/></svg>Activity</div>
+      <div class="nav" id="nv-settings" onclick="nav('settings')"><div class="ind"></div>
+        <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3.2"/><path d="M12 4v2M12 18v2M4 12h2M18 12h2M6.3 6.3l1.4 1.4M16.3 16.3l1.4 1.4M17.7 6.3l-1.4 1.4M7.7 16.3l-1.4 1.4" stroke-linecap="round"/></svg>Settings</div>
+      <div style="flex:1"></div>
+      <div class="rail-label">SCREENS</div>
+      <div class="nav-mini" id="nv-signin" onclick="nav('signin')">Sign-in</div>
+      <div class="nav-mini" id="nv-queue" onclick="nav('queue')">Queue</div>
+      <div class="nav-mini" id="nv-report" onclick="nav('report')">Report</div>
+      <div class="nav-mini" id="nv-tokens" onclick="nav('tokens')">Tokens</div>
+      <div class="rail-user" onclick="nav('signin')">
+        <div class="avatar">V</div>
+        <div style="min-width:0;font-size:10px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">you@&hellip;</div>
+      </div>
+    </div>
+
+    <div class="main">
+      <div class="banner amber" id="bn-session"><div class="dot"></div><span>Your YouTube session expired. Sign in again to continue.</span><button onclick="nav('signin')">Sign in</button><button style="border:none;width:26px;padding:0" onclick="cycleBanner()">&#10005;</button></div>
+      <div class="banner blue" id="bn-update"><div class="dot"></div><span>YouTube changed something on their side &mdash; an update is available that fixes matching.</span><button>Update now</button><button style="border:none;width:26px;padding:0" onclick="cycleBanner()">&#10005;</button></div>
+
+      <div class="content" id="content">
+
+        <!-- SIGN-IN -->
+        <section class="screen on" id="signin">
+          <div class="wrap"><div class="cols">
+            <div style="max-width:340px">
+              <div style="display:flex;align-items:center;gap:12px;margin-bottom:26px">
+                <div style="width:44px;height:44px;border-radius:11px;background:var(--accent);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px -6px var(--accent)"><svg viewBox="0 0 24 24" width="24" height="24" fill="#fff"><path d="M8 5v14l11-7z"/></svg></div>
+                <span style="font-size:24px;font-weight:700;letter-spacing:-.3px">TubeDrop</span>
+              </div>
+              <h1>Drop your music.<br>Get a YouTube playlist.</h1>
+              <p class="lead">TubeDrop reads your local files, finds each track on YouTube &amp; YT Music, and builds the playlist on your own account.</p>
+              <div class="trust"><div class="tick">&#10003;</div><span>Your session stays on this PC</span></div>
+              <div class="trust"><div class="tick">&#10003;</div><span>No API keys, no setup</span></div>
+              <div class="trust"><div class="tick">&#10003;</div><span>Everything is undoable</span></div>
+            </div>
+            <div class="logincard">
+              <div id="signedout">
+                <div style="font-size:16px;font-weight:600;margin-bottom:6px">Connect your account</div>
+                <div style="font-size:12.5px;color:var(--text2);margin-bottom:24px">A normal Google sign-in opens right here in the app.</div>
+                <button class="gbtn" onclick="signIn()"><svg width="17" height="17" viewBox="0 0 24 24"><path fill="#EA4335" d="M12 5.04c1.62 0 3.06.56 4.2 1.64l3.12-3.12C17.46 1.8 14.96.75 12 .75 7.55.75 3.72 3.3 1.85 7.02l3.66 2.84C6.4 7.1 8.98 5.04 12 5.04z"/><path fill="#4285F4" d="M23.25 12.27c0-.86-.08-1.68-.22-2.48H12v4.7h6.33c-.27 1.46-1.1 2.7-2.34 3.53l3.6 2.8c2.1-1.95 3.66-4.8 3.66-8.55z"/><path fill="#FBBC05" d="M5.51 14.14a6.9 6.9 0 010-4.28L1.85 7.02a11.24 11.24 0 000 9.96l3.66-2.84z"/><path fill="#34A853" d="M12 23.25c3 0 5.55-.99 7.4-2.7l-3.6-2.8c-1 .68-2.28 1.08-3.8 1.08-3.02 0-5.6-2.06-6.49-4.83l-3.66 2.84C3.72 20.7 7.55 23.25 12 23.25z"/></svg>Sign in with Google</button>
+              </div>
+              <div id="signedin" style="display:none">
+                <div class="avatar" style="width:72px;height:72px;font-size:28px;margin:0 auto 16px">V</div>
+                <div style="font-size:17px;font-weight:600">Your Name</div>
+                <div style="font-size:12.5px;color:var(--text2);margin-bottom:22px">you@example.com</div>
+                <button class="btn-primary" style="width:100%;justify-content:center" onclick="nav('home')">Continue &rarr;</button>
+                <button class="btn" style="width:100%;margin-top:10px;border:none" onclick="signOut()">Switch account</button>
+              </div>
+            </div>
+          </div></div>
+        </section>
+
+        <!-- HOME -->
+        <section class="screen" id="home">
+          <div class="wrap">
+            <div class="h-head">
+              <div><h1>Build a playlist</h1><p>Drop what you've got. We'll match it on YouTube.</p></div>
+              <div class="seg" id="scope">
+                <button class="opt on" onclick="setScope(this)">YT Music</button>
+                <button class="opt" onclick="setScope(this)">YouTube</button>
+                <button class="opt" onclick="setScope(this)">Both</button>
+              </div>
+            </div>
+
+            <div class="dropzone" id="dz" onclick="simDrop()">
+              <div class="ringbox"><div class="ring"></div></div>
+              <div class="dz-ico"><svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="var(--accent)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V5M8 9l4-4 4 4"/><path d="M5 15v3a2 2 0 002 2h10a2 2 0 002-2v-3"/></svg></div>
+              <div class="dz-t" id="dz-t">Drop songs or folders here</div>
+              <div class="dz-s">MP3 &middot; FLAC &middot; M4A &middot; OPUS &middot; WAV &middot; or an entire folder &mdash; or click to browse</div>
+            </div>
+
+            <div class="readybar" id="readybar">
+              <div class="n" id="rb-n">0</div>
+              <span style="font-size:13px;font-weight:500">tracks ready to process</span>
+              <span style="font-size:12px;color:var(--text2)" id="rb-meta"></span>
+              <div style="flex:1"></div>
+              <button class="btn" style="height:28px;font-size:12px" onclick="clearFiles(event)">Clear</button>
+            </div>
+
+            <div class="card target">
+              <div class="modes">
+                <button class="mode on" id="md-new" onclick="setMode('new')"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>New playlist</button>
+                <button class="mode" id="md-ex" onclick="setMode('ex')">Add to existing</button>
+              </div>
+              <div id="pane-new">
+                <div class="newrow">
+                  <input class="txt" id="plname" value="Late-night drive" style="flex:1">
+                  <div class="seg" id="priv">
+                    <button class="opt on" onclick="setPriv(this)">Private</button>
+                    <button class="opt" onclick="setPriv(this)">Unlisted</button>
+                    <button class="opt" onclick="setPriv(this)">Public</button>
+                  </div>
+                </div>
+                <div class="folderopt">
+                  <button class="tgl" id="mf" onclick="toggleMF()"></button>
+                  <div style="flex:1;min-width:0">
+                    <div class="fo-t">Name playlist after the dropped folder</div>
+                    <div class="fo-s">Use the folder's own name instead of typing one</div>
+                  </div>
+                  <div class="fseg" id="fseg">
+                    <button class="fopt on" onclick="setFolder(this)"><b>Master folder</b><i>/Road trips</i></button>
+                    <button class="fopt" onclick="setFolder(this)"><b>Subfolder</b><i>/Late-night drive</i></button>
+                  </div>
+                </div>
+              </div>
+              <div class="pl-list" id="pane-ex">
+                <div class="pl-search"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Search your playlists&hellip;</div>
+                <div class="pl-row" onclick="selPl(this)"><div class="pl-cov" style="background:#3b5bdb"></div><div style="flex:1"><div style="font-size:13.5px;font-weight:500">Gym 2026</div><div style="font-size:11.5px;color:var(--text2)">74 tracks &middot; updated 2 days ago</div></div></div>
+                <div class="pl-row" onclick="selPl(this)"><div class="pl-cov" style="background:#e8590c"></div><div style="flex:1"><div style="font-size:13.5px;font-weight:500">Jazz Selection</div><div style="font-size:11.5px;color:var(--text2)">24 tracks &middot; updated yesterday</div></div></div>
+                <div class="pl-row" onclick="selPl(this)"><div class="pl-cov" style="background:#2f9e44"></div><div style="flex:1"><div style="font-size:13.5px;font-weight:500">Old demos</div><div style="font-size:11.5px;color:var(--text2)">311 tracks &middot; updated Jan 2026</div></div></div>
+              </div>
+            </div>
+
+            <div class="h-foot">
+              <div class="scopebox">Everything runs locally &middot; every action is undoable from Activity</div>
+              <button class="btn-primary" id="startbtn" disabled onclick="startRun()">Start<span class="badge" id="start-n">0</span><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+            </div>
+          </div>
+        </section>
+
+        <style>
+        /* ---------- QUEUE ---------- */
+        #queue .wrap,#report .wrap,#activity .wrap,#settings .wrap,#tokens .wrap{padding:30px 40px 40px;max-width:980px;margin:0 auto}
+        .q-head{display:flex;align-items:center;gap:16px;margin-bottom:18px;flex-wrap:wrap}
+        .q-head h1{font-size:22px;font-weight:700;letter-spacing:-.4px}
+        .q-sub{font-size:12.5px;color:var(--text2)}
+        .pbar{height:8px;border-radius:99px;background:var(--card2);overflow:hidden;flex:1;min-width:200px}
+        .pbar .fill{height:100%;width:0%;border-radius:99px;background:repeating-linear-gradient(45deg,var(--accent) 0 8px,var(--accent-hi) 8px 16px);background-size:32px 32px;animation:stripe .6s linear infinite;transition:width .4s ease}
+        .tracklist{border:1px solid var(--stroke);border-radius:12px;background:var(--card);overflow:hidden}
+        .trow{display:flex;align-items:center;gap:13px;padding:10px 16px;border-bottom:1px solid var(--stroke);animation:fadein .2s}
+        .trow:last-child{border-bottom:none}
+        .trow.searching{animation:fadein .2s, rowpulse 1.6s ease-in-out infinite}
+        @keyframes rowpulse{0%,100%{opacity:1}50%{opacity:.55}}
+        .cov{width:36px;height:36px;border-radius:7px;flex:none;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff}
+        .t-main{flex:1;min-width:0}
+        .t-t{font-size:13.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .t-a{font-size:11.5px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .t-d{font-size:12px;color:var(--text3);font-variant-numeric:tabular-nums}
+        .stchip{height:24px;padding:0 11px;border-radius:99px;font-size:11px;font-weight:600;display:flex;align-items:center;gap:6px;flex:none;border:1px solid transparent}
+        .st-q{background:var(--card2);color:var(--text3)}
+        .st-s{background:rgba(74,163,255,.10);color:var(--info)}
+        .st-m{background:rgba(65,201,131,.10);color:var(--good)}
+        .st-a{background:rgba(65,201,131,.16);color:var(--good);border-color:rgba(65,201,131,.3)}
+        .st-f{background:rgba(230,172,55,.12);color:var(--warn)}
+        .st-n{background:rgba(255,90,99,.12);color:var(--bad)}
+        .spin{width:11px;height:11px;border-radius:50%;border:2px solid currentColor;border-top-color:transparent;animation:spin .9s linear infinite}
+        .logdrawer{margin-top:14px;border:1px solid var(--stroke);border-radius:10px;background:var(--surface);overflow:hidden}
+        .logdrawer .lg-h{height:36px;display:flex;align-items:center;gap:8px;padding:0 14px;cursor:pointer;font-size:12px;color:var(--text2)}
+        .logdrawer .lg-b{display:none;padding:10px 14px;font-family:'Cascadia Mono',Consolas,monospace;font-size:11px;line-height:1.7;color:var(--text2);max-height:150px;overflow-y:auto;border-top:1px solid var(--stroke)}
+        .logdrawer.open .lg-b{display:block}
+        /* ---------- REPORT ---------- */
+        .sumrow{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:18px}
+        .sumcard{padding:14px 16px;border-radius:11px;border:1px solid var(--stroke);background:var(--card);cursor:pointer;text-align:left;transition:transform .12s}
+        .sumcard:hover{transform:translateY(-2px)}
+        .sumcard.on{border-color:rgba(232,41,76,.5);background:var(--accent-soft)}
+        .sumcard .v{font-size:22px;font-weight:700;line-height:1.1}
+        .sumcard .l{font-size:11px;color:var(--text2);margin-top:3px}
+        .rrow{display:flex;flex-direction:column;border-bottom:1px solid var(--stroke)}
+        .rrow:last-child{border-bottom:none}
+        .rrow .r1{display:flex;align-items:center;gap:13px;padding:10px 16px}
+        .conf{height:22px;min-width:44px;padding:0 8px;border-radius:99px;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none}
+        .c-hi{background:rgba(65,201,131,.14);color:var(--good)}
+        .c-md{background:rgba(230,172,55,.14);color:var(--warn)}
+        .c-lo{background:rgba(255,90,99,.14);color:var(--bad)}
+        .ract{width:30px;height:30px;border-radius:7px;border:1px solid var(--stroke);background:transparent;color:var(--text2);display:flex;align-items:center;justify-content:center;flex:none}
+        .ract:hover{background:var(--card2);color:var(--text)}
+        .editrow{display:none;gap:8px;padding:0 16px 12px 65px}
+        .editrow.on{display:flex;animation:fadein .15s}
+        .yt{font-size:11.5px;color:var(--text2);display:flex;align-items:center;gap:6px;min-width:0}
+        .yt b{color:var(--text);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        /* ---------- ACTIVITY ---------- */
+        .sess{border:1px solid var(--stroke);border-radius:12px;background:var(--card);margin-bottom:14px;overflow:hidden}
+        .sess .s-h{display:flex;align-items:center;gap:13px;padding:14px 18px;cursor:pointer}
+        .sess .s-h:hover{background:var(--card2)}
+        .s-ico{width:38px;height:38px;border-radius:9px;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;flex:none}
+        .s-ops{display:none;border-top:1px solid var(--stroke)}
+        .sess.open .s-ops{display:block}
+        .op{display:flex;align-items:center;gap:12px;padding:9px 18px 9px 30px;border-bottom:1px solid var(--stroke);font-size:12.5px}
+        .op:last-child{border-bottom:none}
+        .op .o-t{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .op .o-time{font-size:11px;color:var(--text3);font-variant-numeric:tabular-nums}
+        .undobtn{height:26px;padding:0 12px;border-radius:6px;border:1px solid var(--stroke);background:transparent;color:var(--text2);font-size:11.5px}
+        .undobtn:hover{background:var(--card2);color:var(--text)}
+        .undobtn.confirm{background:rgba(255,90,99,.14);border-color:rgba(255,90,99,.4);color:var(--bad);font-weight:600}
+        .undone{opacity:.38;text-decoration:line-through}
+        </style>
+
+        <!-- QUEUE -->
+        <section class="screen" id="queue">
+          <div class="wrap">
+            <div class="q-head">
+              <div style="min-width:180px"><h1 id="q-title">Late-night drive</h1><div class="q-sub" id="q-sub">Matching on YT Music</div></div>
+              <div class="pbar"><div class="fill" id="q-fill"></div></div>
+              <div class="q-sub" id="q-eta" style="font-variant-numeric:tabular-nums;min-width:80px;text-align:right">0%</div>
+              <button class="btn" id="q-pause" onclick="togglePause()">Pause</button>
+              <button class="btn" onclick="cancelRun()">Cancel</button>
+              <button class="btn-primary" id="q-report" style="display:none;height:36px;font-size:13px;padding:0 18px" onclick="nav('report')">View report &rarr;</button>
+            </div>
+            <div class="tracklist" id="tlist"></div>
+            <div class="logdrawer" id="logd">
+              <div class="lg-h" onclick="this.parentElement.classList.toggle('open')"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>Live log</div>
+              <div class="lg-b" id="logb"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- REPORT -->
+        <section class="screen" id="report">
+          <div class="wrap">
+            <div class="q-head" style="margin-bottom:16px">
+              <div style="flex:1"><h1>Run report</h1><div class="q-sub">Late-night drive &middot; finished at 01:12 &middot; 3 m 41 s</div></div>
+              <button class="btn">Export CSV</button><button class="btn">Export JSON</button>
+              <button class="btn" style="border-color:rgba(232,41,76,.4);color:var(--accent-hi)">Open playlist &#8599;</button>
+            </div>
+            <div class="sumrow" id="sumrow">
+              <button class="sumcard on" onclick="rfilter(this,'all')"><div class="v" style="color:var(--good)">9</div><div class="l">Added</div></button>
+              <button class="sumcard" onclick="rfilter(this,'uncertain')"><div class="v" style="color:var(--warn)">1</div><div class="l">Uncertain</div></button>
+              <button class="sumcard" onclick="rfilter(this,'notfound')"><div class="v" style="color:var(--bad)">1</div><div class="l">Not found</div></button>
+              <button class="sumcard" onclick="rfilter(this,'dup')"><div class="v">1</div><div class="l">Duplicates</div></button>
+              <button class="sumcard" onclick="rfilter(this,'err')"><div class="v">0</div><div class="l">Errors</div></button>
+            </div>
+            <div class="tracklist" id="rlist"></div>
+          </div>
+        </section>
+
+        <!-- ACTIVITY -->
+        <section class="screen" id="activity">
+          <div class="wrap">
+            <div class="q-head" style="margin-bottom:16px"><div style="flex:1"><h1>Activity</h1><div class="q-sub">Every change TubeDrop made &mdash; and the button to take it back.</div></div></div>
+            <div id="sesslist"></div>
+          </div>
+        </section>
+
+        <style>
+        .sgroup{margin-bottom:22px}
+        .sgroup h3{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:8px;font-weight:600}
+        .srow{display:flex;align-items:center;gap:16px;padding:13px 18px;border-bottom:1px solid var(--stroke)}
+        .srow:last-child{border-bottom:none}
+        .srow .sl{flex:1;min-width:0}
+        .srow .sl b{display:block;font-size:13.5px;font-weight:500}
+        .srow .sl i{display:block;font-size:11.5px;color:var(--text2);font-style:normal;margin-top:2px}
+        .sel{height:34px;border-radius:8px;border:1px solid var(--stroke2);background:var(--surface);padding:0 10px;outline:none}
+        .thb{display:flex;align-items:center;gap:12px;min-width:280px}
+        .thb input[type=range]{flex:1;accent-color:var(--accent)}
+        .verdict{height:24px;padding:0 10px;border-radius:99px;font-size:11px;font-weight:700;display:flex;align-items:center}
+        .keyfield{height:34px;border-radius:8px;border:1px solid var(--stroke2);background:var(--surface);padding:0 10px;outline:none;width:210px;letter-spacing:2px}
+        .tokgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:24px}
+        .sw{border:1px solid var(--stroke);border-radius:10px;overflow:hidden;background:var(--card)}
+        .sw .c{height:52px}
+        .sw .i{padding:8px 11px;font-size:11px}
+        .sw .i b{display:block;font-weight:600}
+        .sw .i span{color:var(--text3);font-family:Consolas,monospace;font-size:10.5px}
+        .typerow{display:flex;align-items:baseline;gap:18px;padding:9px 0;border-bottom:1px solid var(--stroke)}
+        .typerow span{color:var(--text3);font-size:11px;font-family:Consolas,monospace;width:110px;flex:none}
+        #toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);display:none;align-items:center;gap:14px;background:var(--glass);backdrop-filter:blur(18px);border:1px solid var(--stroke2);border-radius:11px;padding:11px 16px;box-shadow:0 18px 50px -12px rgba(0,0,0,.7);z-index:50;animation:toastin .22s ease-out;font-size:13px}
+        #toast.on{display:flex}
+        #toast .tundo{height:28px;padding:0 14px;border-radius:7px;border:1px solid rgba(232,41,76,.45);background:var(--accent-soft);color:var(--accent-hi);font-size:12px;font-weight:600}
+        </style>
+
+        <!-- SETTINGS -->
+        <section class="screen" id="settings">
+          <div class="wrap" style="max-width:760px">
+            <div class="q-head" style="margin-bottom:16px"><h1>Settings</h1></div>
+            <div class="sgroup"><h3>General</h3><div class="card">
+              <div class="srow"><div class="sl"><b>Language</b><i>Interface language</i></div><select class="sel"><option>English</option><option>Italiano</option></select></div>
+              <div class="srow"><div class="sl"><b>Search in</b><i>Where tracks are matched</i></div><select class="sel"><option>YT Music</option><option>YouTube</option><option>Both</option></select></div>
+              <div class="srow"><div class="sl"><b>Default privacy</b><i>For newly created playlists</i></div><select class="sel"><option>Private</option><option>Unlisted</option><option>Public</option></select></div>
+            </div></div>
+            <div class="sgroup"><h3>Matching</h3><div class="card">
+              <div class="srow"><div class="sl"><b>Match threshold</b><i>Example candidate scores <b style="display:inline">95%</b> &mdash; verdict updates live</i></div>
+                <div class="thb"><input type="range" min="50" max="99" value="75" id="th" oninput="thUpd()"><span style="font-variant-numeric:tabular-nums;font-size:12.5px;width:34px" id="thv">75%</span><span class="verdict" id="thverd" style="background:rgba(65,201,131,.14);color:var(--good)">Match &#10003;</span></div></div>
+              <div class="srow"><div class="sl"><b>Aggressive mode</b><i>Below-threshold tracks are added anyway, flagged in the report</i></div><button class="tgl" onclick="this.classList.toggle('on')"></button></div>
+            </div></div>
+            <div class="sgroup"><h3>Fallback modules</h3><div class="card">
+              <div class="srow"><div class="sl"><b>Smart title recognition (local)</b><i>Small on-device model for noisy / non-Latin titles &middot; not downloaded</i></div><button class="btn" style="height:32px;font-size:12px">Download &middot; 74 MB</button></div>
+              <div class="srow"><div class="sl"><b>Cloud refine</b><i>Bring your own API key &mdash; used only when everything else fails</i></div><input class="keyfield" type="password" placeholder="sk-&hellip;"></div>
+            </div></div>
+            <div class="sgroup"><h3>Updates</h3><div class="card">
+              <div class="srow"><div class="sl"><b>Channel</b><i>TubeDrop 1.0.0 &middot; up to date</i></div><select class="sel"><option>Stable</option><option>Beta</option></select><button class="btn" style="height:32px;font-size:12px">Check now</button></div>
+            </div></div>
+            <div style="font-size:11.5px;color:var(--text3);padding:4px 2px">TubeDrop is an unofficial client and is not affiliated with YouTube. MIT licensed.</div>
+          </div>
+        </section>
+
+        <!-- TOKENS -->
+        <section class="screen" id="tokens">
+          <div class="wrap">
+            <div class="q-head" style="margin-bottom:16px"><div style="flex:1"><h1>Design tokens</h1><div class="q-sub">Canonical values &mdash; map 1:1 to the WPF ResourceDictionary.</div></div></div>
+            <h3 style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:8px">Color</h3>
+            <div class="tokgrid" id="tokcolors"></div>
+            <h3 style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:8px">Type ramp &middot; Segoe UI Variable</h3>
+            <div class="card" style="padding:6px 18px;margin-bottom:24px">
+              <div class="typerow"><span>30 / 700</span><div style="font-size:30px;font-weight:700;letter-spacing:-.6px">Hero title</div></div>
+              <div class="typerow"><span>22 / 700</span><div style="font-size:22px;font-weight:700;letter-spacing:-.4px">Page title</div></div>
+              <div class="typerow"><span>13.5 / 500</span><div style="font-size:13.5px;font-weight:500">Row primary text</div></div>
+              <div class="typerow" style="border:none"><span>11.5 / 400</span><div style="font-size:11.5px;color:var(--text2)">Secondary / caption text</div></div>
+            </div>
+            <h3 style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:8px">Shape &amp; status</h3>
+            <div class="card" style="padding:16px 18px;display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+              <div style="width:60px;height:40px;border:1px solid var(--stroke2);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text3)">r 4</div>
+              <div style="width:60px;height:40px;border:1px solid var(--stroke2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text3)">r 8</div>
+              <div style="width:60px;height:40px;border:1px solid var(--stroke2);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text3)">r 12</div>
+              <div style="width:1px;height:30px;background:var(--stroke)"></div>
+              <div class="stchip st-q">Queued</div><div class="stchip st-s"><span class="spin"></span>Searching</div><div class="stchip st-m">Matched 94%</div><div class="stchip st-a">&#10003; Added</div><div class="stchip st-f">&#8635; Fallback</div><div class="stchip st-n">&#9888; Not found</div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+  <div id="toast"><span id="toastmsg"></span><button class="tundo" id="toastundo">Undo &middot; <span id="toastsec">8</span>s</button><button style="border:none;background:none;color:var(--text3);font-size:14px" onclick="hideToast()">&#10005;</button></div>
+</div>
+
+<script>
+var S={screen:'signin',files:0,paused:false,cancelled:false,timer:null,toastTimer:null};
+function $(q){return document.querySelector(q)}
+function $$(q){return document.querySelectorAll(q)}
+var TITLES={signin:'Sign in',home:'Home',queue:'Matching\u2026',report:'Run report',activity:'Activity',settings:'Settings',tokens:'Design tokens'};
+function nav(s){S.screen=s;$$('.screen').forEach(function(e){e.classList.toggle('on',e.id===s)});
+  ['home','activity','settings'].forEach(function(k){$('#nv-'+k).classList.toggle('on',k===s)});
+  ['signin','queue','report','tokens'].forEach(function(k){$('#nv-'+k).classList.toggle('on',k===s)});
+  $('#tb-sub').textContent='\u2014 '+TITLES[s];$('#content').scrollTop=0;
+  if(s==='queue'&&!S.timer&&!S.done)runSim();}
+function toggleTheme(){var l=document.body.classList.toggle('light');$('#themebtn').innerHTML=l?'&#9788; Light':'&#9789; Dark'}
+var BN=0;function cycleBanner(){BN=(BN+1)%3;$('#bn-session').classList.toggle('on',BN===1);$('#bn-update').classList.toggle('on',BN===2)}
+function signIn(){$('#signedout').style.display='none';$('#signedin').style.display='block'}
+function signOut(){$('#signedout').style.display='block';$('#signedin').style.display='none'}
+
+/* ---- home ---- */
+function simDrop(){S.files=Math.min(S.files+ (8+Math.floor(Math.random()*20)),64);
+  $('#rb-n').textContent=S.files;$('#start-n').textContent=S.files;
+  $('#rb-meta').textContent='\u00b7 2 folders, 1 duplicate flagged';
+  $('#readybar').classList.add('on');$('#startbtn').disabled=false;
+  $('#dz-t').textContent=S.files+' tracks loaded \u2014 drop more or press Start';}
+function clearFiles(e){e.stopPropagation();S.files=0;$('#readybar').classList.remove('on');$('#startbtn').disabled=true;$('#dz-t').textContent='Drop songs or folders here'}
+var dz=null;
+window.addEventListener('DOMContentLoaded',function(){dz=$('#dz');
+  dz.addEventListener('dragover',function(e){e.preventDefault();dz.classList.add('drag');$('#dz-t').textContent='Release to load'});
+  dz.addEventListener('dragleave',function(){dz.classList.remove('drag');$('#dz-t').textContent='Drop songs or folders here'});
+  dz.addEventListener('drop',function(e){e.preventDefault();dz.classList.remove('drag');simDrop()});
+  buildTokens();buildActivity();buildReport();});
+function setScope(b){$$('#scope .opt').forEach(function(o){o.classList.remove('on')});b.classList.add('on')}
+function setPriv(b){$$('#priv .opt').forEach(function(o){o.classList.remove('on')});b.classList.add('on')}
+function setMode(m){$('#md-new').classList.toggle('on',m==='new');$('#md-ex').classList.toggle('on',m==='ex');
+  $('#pane-new').style.display=m==='new'?'block':'none';$('#pane-ex').classList.toggle('on',m==='ex')}
+function toggleMF(){var t=$('#mf');t.classList.toggle('on');$('#fseg').classList.toggle('on',t.classList.contains('on'));
+  var inp=$('#plname');if(t.classList.contains('on')){inp.value='Road trips';inp.disabled=true;inp.style.opacity=.55}else{inp.disabled=false;inp.style.opacity=1;inp.value='Late-night drive'}}
+function setFolder(b){$$('#fseg .fopt').forEach(function(o){o.classList.remove('on')});b.classList.add('on');
+  $('#plname').value=b.querySelector('i').textContent.replace('/','')}
+function selPl(r){$$('.pl-row').forEach(function(o){o.classList.remove('sel')});r.classList.add('sel')}
+function startRun(){S.done=false;S.timer=null;$('#q-title').textContent=$('#plname').value||'New playlist';nav('queue')}
+
+/* ---- queue simulation ---- */
+var COL=['#3b5bdb','#e8590c','#2f9e44','#9c36b5','#0c8599','#e03131','#5f3dc4','#c2255c','#495057','#1971c2','#f08c00','#5c940d'];
+var TRK=[
+ ['Tame Impala','The Less I Know The Better','3:36','a',97],
+ ['Daft Punk','Veridis Quo','5:44','a',95],
+ ['Khruangbin','Maria Tambi\u00e9n','3:36','a',91],
+ ['YOASOBI','\u591c\u306b\u99c6\u3051\u308b (Yoru ni Kakeru)','4:23','f',88],
+ ['Mahmood','Tuta Gold','3:07','a',94],
+ ['Fairuz','Li Beirut \u00b7 \u0644\u0628\u064a\u0631\u0648\u062a','5:12','f',84],
+ ['Pink Floyd','Time (live bootleg 1974)','7:02','n',0],
+ ['C2C','Delta','3:39','a',92],
+ ['Lucio Battisti','Il mio canto libero','5:07','a',96],
+ ['Unknown','track09_final_v2.mp3','3:58','f',79],
+ ['Bicep','Glue','4:29','a',93],
+ ['Tame Impala','The Less I Know The Better','3:36','d',0]];
+function chipHTML(st,conf){
+ if(st==='q')return '<div class="stchip st-q">Queued</div>';
+ if(st==='s')return '<div class="stchip st-s"><span class="spin"></span>Searching</div>';
+ if(st==='m')return '<div class="stchip st-m">Matched '+conf+'%</div>';
+ if(st==='a')return '<div class="stchip st-a">&#10003; Added</div>';
+ if(st==='f')return '<div class="stchip st-f">&#8635; Fallback \u00b7 '+conf+'%</div>';
+ if(st==='d')return '<div class="stchip st-q">Duplicate \u00b7 skipped</div>';
+ return '<div class="stchip st-n">&#9888; Not found</div>';}
+function ini(a){return a==='Unknown'?'\u266a':a.split(' ').map(function(w){return w[0]}).slice(0,2).join('').toUpperCase()}
+function runSim(){var tl=$('#tlist');tl.innerHTML='';$('#q-report').style.display='none';$('#logb').innerHTML='';
+ TRK.forEach(function(t,i){tl.insertAdjacentHTML('beforeend',
+  '<div class="trow" id="tr'+i+'"><div class="cov" style="background:'+COL[i%COL.length]+'">'+ini(t[0])+'</div>'+
+  '<div class="t-main"><div class="t-t">'+t[1]+'</div><div class="t-a">'+t[0]+'</div></div>'+
+  '<div class="t-d">'+t[2]+'</div><div class="chipbox">'+chipHTML('q')+'</div></div>')});
+ var i=0,phase=0;S.cancelled=false;S.paused=false;
+ function log(m){var b=$('#logb');b.insertAdjacentHTML('beforeend',m+'<br>');b.scrollTop=b.scrollHeight}
+ S.timer=setInterval(function(){if(S.paused)return;
+  if(i>=TRK.length){clearInterval(S.timer);S.timer=null;S.done=true;$('#q-eta').textContent='Done';$('#q-fill').style.width='100%';$('#q-report').style.display='flex';$('#q-pause').style.display='none';return}
+  var t=TRK[i],row=$('#tr'+i),box=row.querySelector('.chipbox');
+  if(phase===0){row.classList.add('searching');box.innerHTML=chipHTML('s');log('search \u201c'+t[0]+' '+t[1]+'\u201d \u2192 10 candidates');phase=1}
+  else{row.classList.remove('searching');
+   if(t[3]==='f')log('below threshold \u2192 fallback: transliterate + strip noise \u2192 '+t[4]+'%');
+   if(t[3]==='n')log('best 58% (live mismatch) \u2192 NOT added');
+   if(t[3]==='d')log('duplicate of #1 \u2192 skipped');
+   box.innerHTML=chipHTML(t[3]==='a'?'a':t[3],t[4]);
+   if(t[3]==='a'||t[3]==='f')log('edit_playlist ADD ok \u00b7 setVideoId stored (undo ready)');
+   i++;phase=0;var pc=Math.round(i/TRK.length*100);$('#q-fill').style.width=pc+'%';$('#q-eta').textContent=pc+'%'}
+ },420)}
+function togglePause(){S.paused=!S.paused;$('#q-pause').textContent=S.paused?'Resume':'Pause'}
+function cancelRun(){if(S.timer){clearInterval(S.timer);S.timer=null}S.done=false;nav('home')}
+
+/* ---- report ---- */
+var RPT=[
+ ['a',97,'Tame Impala \u2014 The Less I Know The Better','Tame Impala - Topic \u00b7 3:36','all'],
+ ['a',95,'Daft Punk \u2014 Veridis Quo','Daft Punk - Topic \u00b7 5:44','all'],
+ ['f',88,'YOASOBI \u2014 \u591c\u306b\u99c6\u3051\u308b','YOASOBI official \u00b7 4:23 \u00b7 via transliteration','uncertain'],
+ ['f',84,'Fairuz \u2014 Li Beirut','Fairuz - Topic \u00b7 5:12 \u00b7 via transliteration','all'],
+ ['n',58,'Pink Floyd \u2014 Time (live bootleg 1974)','best candidate rejected: live mismatch','notfound'],
+ ['f',79,'Unknown \u2014 track09_final_v2.mp3','matched from filename heuristics','uncertain'],
+ ['d',0,'Tame Impala \u2014 The Less I Know The Better','duplicate of row 1 \u00b7 skipped','dup']];
+function buildReport(){var rl=$('#rlist');rl.innerHTML='';
+ RPT.forEach(function(r,i){var cls=r[1]>=90?'c-hi':r[1]>=70?'c-md':'c-lo';
+  rl.insertAdjacentHTML('beforeend','<div class="rrow" data-f="'+r[4]+'"><div class="r1">'+
+  '<div class="conf '+cls+'">'+(r[0]==='d'?'dup':r[1]+'%')+'</div>'+
+  '<div class="t-main"><div class="t-t">'+r[2]+'</div><div class="yt"><b>'+r[3]+'</b></div></div>'+
+  '<button class="ract" title="Open on YouTube">&#8599;</button>'+
+  '<button class="ract" title="Edit query & retry" onclick="this.closest(\'.rrow\').querySelector(\'.editrow\').classList.toggle(\'on\')">&#9998;</button>'+
+  '<button class="ract" title="Remove (undoable)" onclick="toast(\'Removed 1 track from playlist\')">&#10005;</button></div>'+
+  '<div class="editrow"><input class="txt" style="height:34px;flex:1;font-size:12.5px" value="'+r[2].replace(/&/g,'&amp;').replace(/"/g,'')+'"><button class="btn" style="height:34px">Retry</button></div></div>')});}
+function rfilter(card,f){$$('.sumcard').forEach(function(c){c.classList.remove('on')});card.classList.add('on');
+ $$('#rlist .rrow').forEach(function(r){var v=r.getAttribute('data-f');r.style.display=(f==='all'||v===f||(f==='uncertain'&&v==='uncertain'))?'flex':'none';
+ if(f==='all')r.style.display='flex'})}
+
+/* ---- activity ---- */
+var SESS=[
+ {name:'Late-night drive',meta:'Today 01:12 \u00b7 10 added \u00b7 playlist created',ops:[
+  ['Created playlist \u201cLate-night drive\u201d (private)','01:08'],
+  ['Added 10 tracks','01:12'],
+  ['Removed \u201ctrack09_final_v2\u201d after review','01:14']]},
+ {name:'Jazz Selection',meta:'Yesterday 22:40 \u00b7 24 added to existing',ops:[
+  ['Added 24 tracks to \u201cJazz Selection\u201d','22:40']]}];
+function buildActivity(){var sl=$('#sesslist');sl.innerHTML='';
+ SESS.forEach(function(s,i){var ops=s.ops.map(function(o,j){return '<div class="op" id="op'+i+'_'+j+'"><span class="o-time">'+o[1]+'</span><span class="o-t">'+o[0]+'</span><button class="undobtn" onclick="undoOp(event,'+i+','+j+')">Undo</button></div>'}).join('');
+  sl.insertAdjacentHTML('beforeend','<div class="sess" id="sess'+i+'"><div class="s-h" onclick="this.parentElement.classList.toggle(\'open\')">'+
+  '<div class="s-ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>'+
+  '<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600">'+s.name+'</div><div style="font-size:11.5px;color:var(--text2)">'+s.meta+'</div></div>'+
+  '<button class="undobtn" onclick="undoSess(event,this,'+i+')">Undo entire session</button>'+
+  '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--text3)" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div>'+
+  '<div class="s-ops">'+ops+'</div></div>')});}
+function undoOp(e,i,j){e.stopPropagation();var op=$('#op'+i+'_'+j);op.classList.add('undone');op.querySelector('.undobtn').disabled=true;
+ toast('Undone: '+op.querySelector('.o-t').textContent,function(){op.classList.remove('undone');op.querySelector('.undobtn').disabled=false})}
+function undoSess(e,btn,i){e.stopPropagation();
+ if(!btn.classList.contains('confirm')){btn.classList.add('confirm');btn.textContent='Sure? Undo all';setTimeout(function(){btn.classList.remove('confirm');btn.textContent='Undo entire session'},3500);return}
+ $('#sess'+i).style.opacity=.35;btn.disabled=true;btn.textContent='Session undone';
+ toast('Session \u201c'+SESS[i].name+'\u201d fully undone',function(){$('#sess'+i).style.opacity=1;btn.disabled=false;btn.classList.remove('confirm');btn.textContent='Undo entire session'})}
+
+/* ---- toast with countdown ---- */
+function toast(msg,undoCb){var t=$('#toast');$('#toastmsg').textContent=msg;t.classList.add('on');
+ var sec=8;$('#toastsec').textContent=sec;clearInterval(S.toastTimer);
+ $('#toastundo').onclick=function(){if(undoCb)undoCb();hideToast()};
+ S.toastTimer=setInterval(function(){sec--;if(sec<=0){hideToast();return}$('#toastsec').textContent=sec},1000)}
+function hideToast(){$('#toast').classList.remove('on');clearInterval(S.toastTimer)}
+
+/* ---- settings live threshold ---- */
+function thUpd(){var v=+$('#th').value;$('#thv').textContent=v+'%';var ok=95>=v;var el=$('#thverd');
+ el.textContent=ok?'Match \u2713':'Fallback \u21bb';
+ el.style.background=ok?'rgba(65,201,131,.14)':'rgba(230,172,55,.14)';el.style.color=ok?'var(--good)':'var(--warn)'}
+
+/* ---- tokens ---- */
+function buildTokens(){var T=[['bg','#080808'],['surface','#101010'],['card','#181818'],['card2','#202020'],['card3','#282828'],['accent','#e8294c'],['accent-hi','#ff3d5f'],['good','#41c983'],['warn','#e6ac37'],['bad','#ff5a63'],['info','#4aa3ff'],['text','#f0f0f0'],['text2','#8f8f96'],['text3','#55555c']];
+ var g=$('#tokcolors');g.innerHTML=T.map(function(t){return '<div class="sw"><div class="c" style="background:'+t[1]+'"></div><div class="i"><b>--'+t[0]+'</b><span>'+t[1]+'</span></div></div>'}).join('')}
+</script>
+</body>
+</html>

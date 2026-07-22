@@ -1,0 +1,17 @@
+<Project>
+  <PropertyGroup>
+    <!-- Single place to bump when moving to .NET 10 LTS -->
+    <TubeDropFramework>net8.0</TubeDropFramework>
+    <TubeDropWindowsFramework>net8.0-windows</TubeDropWindowsFramework>
+
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <Authors>TubeDrop contributors</Authors>
+    <Product>TubeDrop</Product>
+    <NeutralLanguage>en</NeutralLanguage>
+  </PropertyGroup>
+</Project>

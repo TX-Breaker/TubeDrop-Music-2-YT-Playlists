@@ -1,0 +1,19 @@
+# Normalize line endings: source is LF in the repo, checked out CRLF on Windows.
+* text=auto
+
+*.cs      text eol=lf
+*.csproj  text eol=lf
+*.props   text eol=lf
+*.targets text eol=lf
+*.xaml    text eol=lf
+*.json    text eol=lf
+*.md      text eol=lf
+*.yml     text eol=lf
+*.yaml    text eol=lf
+*.manifest text eol=lf
+*.editorconfig text eol=lf
+
+# Binary assets
+*.png binary
+*.jpg binary
+*.ico binary

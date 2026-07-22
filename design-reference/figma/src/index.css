@@ -1,0 +1,103 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-surface-0: #080808;
+  --color-surface-1: #101010;
+  --color-surface-2: #181818;
+  --color-surface-3: #202020;
+  --color-surface-4: #282828;
+  --color-accent: #e8294c;
+  --color-accent-hi: #ff3d5f;
+  --color-accent-dim: rgba(232, 41, 76, 0.12);
+  --color-text-1: #f0f0f0;
+  --color-text-2: #888888;
+  --color-text-3: #444444;
+  --color-border: rgba(255,255,255,0.06);
+  --color-border-2: rgba(255,255,255,0.11);
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+body {
+  font-family: 'Segoe UI Variable', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: #080808;
+  color: #f0f0f0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbars — hidden until hover */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+/* Drop zone idle shimmer */
+@keyframes dz-idle {
+  0%,100% { opacity: 0.45; }
+  50% { opacity: 0.7; }
+}
+.dz-idle { animation: dz-idle 3s ease-in-out infinite; }
+
+/* Drop zone active glow */
+@keyframes dz-active {
+  0%,100% { box-shadow: 0 0 0 0 rgba(232,41,76,0), inset 0 0 60px rgba(232,41,76,0.04); }
+  50% { box-shadow: 0 0 40px 6px rgba(232,41,76,0.12), inset 0 0 60px rgba(232,41,76,0.08); }
+}
+.dz-active { animation: dz-active 1.2s ease-in-out infinite; }
+
+/* Searching track row pulse */
+@keyframes row-pulse {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+.row-searching { animation: row-pulse 1.6s ease-in-out infinite; }
+
+/* Progress bar fill */
+@keyframes progress-stripe {
+  from { background-position: 0 0; }
+  to { background-position: 32px 0; }
+}
+
+/* Toast slide-up */
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(8px) translateX(-50%); }
+  to { opacity: 1; transform: translateY(0) translateX(-50%); }
+}
+.toast-in { animation: toast-in 0.22s ease-out forwards; }
+
+/* Fade in generic */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(3px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-in { animation: fade-in 0.18s ease-out; }
+
+/* Spin for searching indicator */
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.spin { animation: spin 0.9s linear infinite; }
+
+/* Mica-like glass surface */
+.glass {
+  background: rgba(20,20,20,0.75);
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+}
+
+/* Range input accent */
+input[type=range] {
+  accent-color: #e8294c;
+  cursor: pointer;
+}
+
+/* Checkbox accent */
+input[type=checkbox] { accent-color: #e8294c; cursor: pointer; }

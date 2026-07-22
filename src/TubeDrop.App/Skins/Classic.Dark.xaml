@@ -1,0 +1,49 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!-- Skin: Classic.Dark — tokens extracted from design-reference (§12.1). Generated. -->
+  <Color x:Key="TubeDrop.Color.Bg">#FF151517</Color>
+  <Color x:Key="TubeDrop.Color.Surface">#FF1E1E22</Color>
+  <Color x:Key="TubeDrop.Color.Card">#FF26262C</Color>
+  <Color x:Key="TubeDrop.Color.Card2">#FF2D2D34</Color>
+  <Color x:Key="TubeDrop.Color.Card3">#FF34343C</Color>
+  <Color x:Key="TubeDrop.Color.Rail">#FF111113</Color>
+  <Color x:Key="TubeDrop.Color.Stroke">#14FFFFFF</Color>
+  <Color x:Key="TubeDrop.Color.Stroke2">#0DFFFFFF</Color>
+  <Color x:Key="TubeDrop.Color.Text">#EBFFFFFF</Color>
+  <Color x:Key="TubeDrop.Color.Text2">#8FFFFFFF</Color>
+  <Color x:Key="TubeDrop.Color.Text3">#5CFFFFFF</Color>
+  <Color x:Key="TubeDrop.Color.Accent">#FFFF2E4D</Color>
+  <Color x:Key="TubeDrop.Color.AccentHi">#FFFF4D68</Color>
+  <Color x:Key="TubeDrop.Color.AccentSoft">#24FF2E4D</Color>
+  <Color x:Key="TubeDrop.Color.OnAccent">#FFFFFFFF</Color>
+  <Color x:Key="TubeDrop.Color.Good">#FF41C983</Color>
+  <Color x:Key="TubeDrop.Color.Warn">#FFE6AC37</Color>
+  <Color x:Key="TubeDrop.Color.Bad">#FFFF5A63</Color>
+  <Color x:Key="TubeDrop.Color.Info">#FF4AA3FF</Color>
+
+  <SolidColorBrush x:Key="TubeDrop.Brush.Bg" Color="{StaticResource TubeDrop.Color.Bg}" />
+  <SolidColorBrush x:Key="TubeDrop.Brush.Surface" Color="{StaticResource TubeDrop.Color.Surface}" />
+  <SolidColorBrush x:Key="TubeDrop.Brush.Card" Color="{StaticResource TubeDrop.Color.Card}" />
+  <SolidColorBrush x:Key="TubeDrop.Brush.Card2" Color="{StaticResource TubeDrop.Color.Card2}" />
+  <SolidColorBrush x:Key="TubeDrop.Brush.Card3" Color="{StaticResource TubeDrop.Color.Card3}" />
+  <SolidColorBrush x:Key="TubeDrop.Brush.Rail" Color="{StaticResource TubeDrop.Color.Rail}" />
+  <SolidColorBrush x:Key="TubeDrop.Brush.Stroke" Color="{StaticResource TubeDrop.Color.Stroke}" />
+  <SolidColorBrush x:Key="TubeDrop.Brush.Stroke2" Color="{StaticResource TubeDrop.Color.Stroke2}" />
+  <SolidColorBrush x:Key="TubeDrop.Brush.Text" Color="{StaticResource TubeDrop.Color.Text}" />
+  <SolidColorBrush x:Key="TubeDrop.Brush.Text2" Color="{StaticResource TubeDrop.Color.Text2}" />
+  <SolidColorBrush x:Key="TubeDrop.Brush.Text3" Color="{StaticResource TubeDrop.Color.Text3}" />
+  <SolidColorBrush x:Key="TubeDrop.Brush.Accent" Color="{StaticResource TubeDrop.Color.Accent}" />
+  <SolidColorBrush x:Key="TubeDrop.Brush.AccentHi" Color="{StaticResource TubeDrop.Color.AccentHi}" />
+  <SolidColorBrush x:Key="TubeDrop.Brush.AccentSoft" Color="{StaticResource TubeDrop.Color.AccentSoft}" />
+  <SolidColorBrush x:Key="TubeDrop.Brush.OnAccent" Color="{StaticResource TubeDrop.Color.OnAccent}" />
+  <SolidColorBrush x:Key="TubeDrop.Brush.Good" Color="{StaticResource TubeDrop.Color.Good}" />
+  <SolidColorBrush x:Key="TubeDrop.Brush.Warn" Color="{StaticResource TubeDrop.Color.Warn}" />
+  <SolidColorBrush x:Key="TubeDrop.Brush.Bad" Color="{StaticResource TubeDrop.Color.Bad}" />
+  <SolidColorBrush x:Key="TubeDrop.Brush.Info" Color="{StaticResource TubeDrop.Color.Info}" />
+
+  <CornerRadius x:Key="TubeDrop.Radius.Sm">5</CornerRadius>
+  <CornerRadius x:Key="TubeDrop.Radius.Md">8</CornerRadius>
+  <CornerRadius x:Key="TubeDrop.Radius.Lg">12</CornerRadius>
+  <CornerRadius x:Key="TubeDrop.Radius.Card">14</CornerRadius>
+  <CornerRadius x:Key="TubeDrop.Radius.Pill">99</CornerRadius>
+</ResourceDictionary>

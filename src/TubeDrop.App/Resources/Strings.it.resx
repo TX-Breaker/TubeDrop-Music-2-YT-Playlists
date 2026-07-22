@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+
+  <data name="Nav_Home"><value>Home</value></data>
+  <data name="Nav_Queue"><value>Coda</value></data>
+  <data name="Nav_Report"><value>Report</value></data>
+  <data name="Nav_Activity"><value>Attività</value></data>
+  <data name="Nav_Settings"><value>Impostazioni</value></data>
+
+  <data name="Common_SignIn"><value>Accedi</value></data>
+  <data name="Common_SignedIn"><value>✓ Accesso eseguito</value></data>
+  <data name="Common_SessionExpired"><value>⚠ Sessione scaduta — accedi di nuovo per continuare.</value></data>
+
+  <data name="Home_Title"><value>Trascina la tua musica</value></data>
+  <data name="Home_Subtitle"><value>File e cartelle — tutto ciò che non è audio viene ignorato</value></data>
+  <data name="Home_Destination"><value>Destinazione</value></data>
+  <data name="Home_CreateNew"><value>Crea nuova playlist</value></data>
+  <data name="Home_AppendExisting"><value>Aggiungi a esistente</value></data>
+  <data name="Home_Name"><value>Nome</value></data>
+  <data name="Home_NameFromFolder"><value>Usa il nome della cartella trascinata</value></data>
+  <data name="Home_Privacy"><value>Privacy</value></data>
+  <data name="Home_CreateButton"><value>Crea playlist</value></data>
+  <data name="Home_Reset"><value>Reimposta</value></data>
+  <data name="Home_Refresh"><value>Aggiorna</value></data>
+  <data name="Home_PickPlaylist"><value>Scegli una playlist</value></data>
+
+  <data name="Settings_Title"><value>Impostazioni</value></data>
+  <data name="Settings_Appearance"><value>Aspetto</value></data>
+  <data name="Settings_Skin"><value>Tema grafico</value></data>
+  <data name="Settings_LightTheme"><value>Tema chiaro</value></data>
+  <data name="Settings_Language"><value>Lingua</value></data>
+  <data name="Settings_Matching"><value>Corrispondenza</value></data>
+  <data name="Settings_SearchScope"><value>Ambito di ricerca</value></data>
+  <data name="Settings_Aggressive"><value>Modalità aggressiva (aggiunge le corrispondenze migliori, segnalate nel report)</value></data>
+  <data name="Settings_Fallback"><value>Moduli di fallback</value></data>
+  <data name="Settings_Onnx"><value>Refiner ONNX locale (scaricato al primo uso)</value></data>
+  <data name="Settings_Cloud"><value>Refiner LLM cloud</value></data>
+  <data name="Settings_Playlists"><value>Playlist</value></data>
+  <data name="Settings_DefaultPrivacy"><value>Privacy predefinita</value></data>
+  <data name="Settings_Network"><value>Rete e aggiornamenti</value></data>
+  <data name="Settings_RateLimit"><value>Profilo di rate limit</value></data>
+  <data name="Settings_UpdateChannel"><value>Canale di aggiornamento</value></data>
+
+  <data name="Report_Added"><value>Aggiunte</value></data>
+  <data name="Report_Fallback"><value>Fallback</value></data>
+  <data name="Report_Unmatched"><value>Non trovate</value></data>
+  <data name="Report_Duplicates"><value>Duplicate</value></data>
+  <data name="Report_Skipped"><value>Ignorate</value></data>
+  <data name="Report_ExportCsv"><value>Esporta CSV</value></data>
+  <data name="Report_ExportJson"><value>Esporta JSON</value></data>
+  <data name="Report_Open"><value>Apri</value></data>
+  <data name="Report_Search"><value>Cerca</value></data>
+  <data name="Report_Remove"><value>Rimuovi</value></data>
+
+  <data name="Activity_Title"><value>Attività</value></data>
+  <data name="Activity_UndoSession"><value>Annulla intera sessione</value></data>
+  <data name="Activity_Undo"><value>Annulla</value></data>
+</root>

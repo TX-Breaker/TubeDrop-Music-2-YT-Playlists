@@ -1,0 +1,43 @@
+# AI session state (continuity protocol)
+.ai_state.md
+
+# Build results
+bin/
+obj/
+out/
+publish/
+[Rr]eleases/
+
+# Visual Studio / Rider / VS Code
+.vs/
+.idea/
+*.user
+*.suo
+.vscode/
+
+# Test results
+TestResults/
+*.trx
+coverage*.xml
+coverage*.json
+
+# NuGet
+*.nupkg
+packages/
+
+# Velopack local output
+velopack_out/
+
+# Local publish output (large self-contained binaries — not committed)
+/release/
+/release-new/
+
+# Logs
+*.log
+
+# OS junk
+Thumbs.db
+Desktop.ini
+
+# Original design drop (local source material) — the repo ships design-reference/ (§12.1)
+UI/
