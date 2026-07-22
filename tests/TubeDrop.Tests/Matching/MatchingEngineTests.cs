@@ -111,20 +111,35 @@ public sealed class MatchingEngineTests
     }
 
     [Fact]
-    public async Task NoArtist_Unmatched_WithoutSearching()
+    public async Task NoArtist_StillSearches_SkipIsLastResort()
     {
+        // No artist is NOT a reason to skip up front — the track still searches.
         var searcher = new FakeSearcher(_ => [Good()]);
         var engine = new MatchingEngine(searcher, []);
-        var noArtist = new TrackInfo { SourcePath = "x.mp3", Artist = "", Title = "Some Title", DurationSeconds = 200 };
+        var noArtist = new TrackInfo { SourcePath = "x.mp3", Artist = "", Title = "One More Time", DurationSeconds = 320 };
 
         var result = await engine.MatchAsync(noArtist, new MatchingOptions());
 
-        Assert.Equal(MatchStatus.Unmatched, result.Status);
-        Assert.Empty(searcher.Queries); // never searched
+        Assert.NotEmpty(searcher.Queries);
+        Assert.Equal(MatchStatus.AutoMatched, result.Status);
     }
 
     [Fact]
-    public async Task NonLatinTitle_NoArtist_StillSearchesVerbatim()
+    public async Task NoArtist_NothingGood_Unmatched()
+    {
+        // Only unmatched when the search finds nothing over threshold (last resort).
+        var searcher = new FakeSearcher(_ => [Bad()]);
+        var engine = new MatchingEngine(searcher, []);
+        var noArtist = new TrackInfo { SourcePath = "x.mp3", Artist = "", Title = "Some Obscure Title", DurationSeconds = 200 };
+
+        var result = await engine.MatchAsync(noArtist, new MatchingOptions());
+
+        Assert.NotEmpty(searcher.Queries); // it tried
+        Assert.Equal(MatchStatus.Unmatched, result.Status);
+    }
+
+    [Fact]
+    public async Task NonLatinTitle_NoArtist_SearchesVerbatim()
     {
         var searcher = new FakeSearcher(_ => [Good()]);
         var engine = new MatchingEngine(searcher, []);
@@ -132,20 +147,7 @@ public sealed class MatchingEngineTests
 
         await engine.MatchAsync(cjk, new MatchingOptions());
 
-        // Not skipped despite no artist; the raw title is searched.
         Assert.Contains("布瑞吉Bridge-来我敬你", searcher.Queries);
-    }
-
-    [Fact]
-    public async Task NoArtist_RequireArtistOff_StillSearches()
-    {
-        var searcher = new FakeSearcher(_ => [Good()]);
-        var engine = new MatchingEngine(searcher, []);
-        var noArtist = new TrackInfo { SourcePath = "x.mp3", Artist = "", Title = "One More Time", DurationSeconds = 320 };
-
-        var result = await engine.MatchAsync(noArtist, new MatchingOptions { RequireArtist = false });
-
-        Assert.NotEmpty(searcher.Queries);
     }
 
     [Fact]

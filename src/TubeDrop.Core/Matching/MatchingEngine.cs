@@ -47,13 +47,6 @@ public sealed record MatchingOptions
     public double Threshold { get; init; } = 0.75;
     public SearchScope Scope { get; init; } = SearchScope.YtmSongs;
     public bool AggressiveMode { get; init; }
-
-    /// <summary>
-    /// When true (default), a track whose artist could not be determined from
-    /// tags or the filename is reported as Unmatched without searching — a
-    /// title-only query is too ambiguous to trust (user request).
-    /// </summary>
-    public bool RequireArtist { get; init; } = true;
 }
 
 /// <summary>
@@ -72,15 +65,10 @@ public sealed class MatchingEngine(
         MatchingOptions options,
         CancellationToken ct = default)
     {
-        // No determinable artist → don't guess from a title-only query (user request).
-        // Exception: non-Latin titles (Chinese, Devanagari, …) are searched verbatim
-        // as named, without needing an artist.
-        if (options.RequireArtist && string.IsNullOrWhiteSpace(track.Artist)
-            && !TextNormalizer.HasNonLatin(track.Title))
-        {
-            return new TrackMatchResult(track, MatchStatus.Unmatched, null, null, null);
-        }
-
+        // Note: a missing artist is NOT a reason to skip up front. The whole
+        // recognition chain (tags → filename → audio fingerprint) runs before we
+        // get here; the track still searches (title-based), and skipping it is the
+        // last resort — it only ends up Unmatched if nothing clears the threshold.
         ScoredCandidate? bestOverall = null;
         string? bestQuery = null;
         string? bestRefiner = null;

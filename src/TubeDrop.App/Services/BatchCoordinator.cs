@@ -53,7 +53,6 @@ public sealed class BatchCoordinator(
     JournaledPlaylistService playlistService,
     ISettingsStore settings,
     TubeDrop.Core.Fingerprint.IMetadataEnricher enricher,
-    LocalizationService loc,
     ILogger<BatchCoordinator> logger)
 {
     public async Task<BatchOutcome> RunAsync(
@@ -96,10 +95,6 @@ public sealed class BatchCoordinator(
                 else
                 {
                     item.Phase = TrackPhase.Unmatched;
-                    if (string.IsNullOrWhiteSpace(item.Track.Artist))
-                    {
-                        item.Message = loc["Batch_NoArtist"];
-                    }
                 }
             }
             catch (OperationCanceledException)
