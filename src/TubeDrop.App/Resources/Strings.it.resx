@@ -60,6 +60,8 @@
   <data name="Common_SignIn"><value>Accedi</value></data>
   <data name="Common_SignedIn"><value>✓ Accesso eseguito</value></data>
   <data name="Common_SessionExpired"><value>⚠ Sessione scaduta — accedi di nuovo per continuare.</value></data>
+  <data name="Account_Switch"><value>Cambia account</value></data>
+  <data name="Account_SignOut"><value>Esci</value></data>
 
   <data name="Home_Title"><value>Trascina la tua musica</value></data>
   <data name="Home_Subtitle"><value>File e cartelle — tutto ciò che non è audio viene ignorato</value></data>

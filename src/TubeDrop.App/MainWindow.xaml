@@ -34,6 +34,8 @@
         <DockPanel Margin="8,10,8,10">
           <StackPanel DockPanel.Dock="Bottom">
             <Border Height="1" Background="{DynamicResource TubeDrop.Brush.Stroke}" Margin="6,8" />
+
+            <!-- Not signed in: sign-in button -->
             <Button HorizontalAlignment="Stretch" Height="40" BorderThickness="0"
                     Background="Transparent"
                     Foreground="{DynamicResource TubeDrop.Brush.Text2}"
@@ -45,10 +47,59 @@
                            FontSize="10" HorizontalAlignment="Center" />
               </StackPanel>
             </Button>
-            <TextBlock Text="{Binding [Common_SignedIn], Source={StaticResource Loc}}" FontSize="10" Margin="0,8"
-                       HorizontalAlignment="Center"
-                       Foreground="{DynamicResource TubeDrop.Brush.Good}"
-                       Visibility="{Binding IsSignedIn, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+            <!-- Signed in: avatar → account menu popup -->
+            <Grid HorizontalAlignment="Center"
+                  Visibility="{Binding IsSignedIn, Converter={StaticResource BooleanToVisibilityConverter}}">
+              <ToggleButton x:Name="AccountToggle" Width="40" Height="40" BorderThickness="0"
+                            Background="Transparent" Cursor="Hand"
+                            ToolTip="{Binding AccountName}">
+                <ToggleButton.Template>
+                  <ControlTemplate TargetType="ToggleButton">
+                    <Grid Width="34" Height="34">
+                      <Ellipse Fill="{DynamicResource TubeDrop.Brush.Accent}" />
+                      <TextBlock Text="{Binding AccountInitial}" FontWeight="Bold" FontSize="14"
+                                 Foreground="{DynamicResource TubeDrop.Brush.OnAccent}"
+                                 HorizontalAlignment="Center" VerticalAlignment="Center"
+                                 Visibility="{Binding HasAvatar, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                      <Ellipse Visibility="{Binding HasAvatar, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Ellipse.Fill>
+                          <ImageBrush ImageSource="{Binding AvatarUrl}" Stretch="UniformToFill" />
+                        </Ellipse.Fill>
+                      </Ellipse>
+                    </Grid>
+                  </ControlTemplate>
+                </ToggleButton.Template>
+              </ToggleButton>
+
+              <Popup PlacementTarget="{Binding ElementName=AccountToggle}" Placement="Top"
+                     StaysOpen="False" AllowsTransparency="True"
+                     IsOpen="{Binding IsChecked, ElementName=AccountToggle, Mode=TwoWay}">
+                <Border Margin="8" Padding="6" MinWidth="200"
+                        Background="{DynamicResource TubeDrop.Brush.Card2}"
+                        BorderBrush="{DynamicResource TubeDrop.Brush.Stroke}" BorderThickness="1"
+                        CornerRadius="{DynamicResource TubeDrop.Radius.Md}">
+                  <StackPanel>
+                    <TextBlock Text="{Binding [Common_SignedIn], Source={StaticResource Loc}}"
+                               Foreground="{DynamicResource TubeDrop.Brush.Good}" Margin="8,6,8,0" />
+                    <TextBlock Text="{Binding AccountName}" Margin="8,0,8,6" TextTrimming="CharacterEllipsis"
+                               Foreground="{DynamicResource TubeDrop.Brush.Text2}"
+                               Visibility="{Binding AccountName, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    <Border Height="1" Background="{DynamicResource TubeDrop.Brush.Stroke}" Margin="4,4" />
+                    <Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                            Height="34" BorderThickness="0" Background="Transparent"
+                            Foreground="{DynamicResource TubeDrop.Brush.Text}"
+                            Command="{Binding SwitchAccountCommand}"
+                            Content="{Binding [Account_Switch], Source={StaticResource Loc}}" />
+                    <Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                            Height="34" BorderThickness="0" Background="Transparent"
+                            Foreground="{DynamicResource TubeDrop.Brush.Text}"
+                            Command="{Binding SignOutCommand}"
+                            Content="{Binding [Account_SignOut], Source={StaticResource Loc}}" />
+                  </StackPanel>
+                </Border>
+              </Popup>
+            </Grid>
           </StackPanel>
 
           <StackPanel>

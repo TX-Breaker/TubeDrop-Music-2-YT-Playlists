@@ -31,14 +31,22 @@ public sealed class AuthService : ISessionProvider
 
     public bool IsSignedIn => Current is not null;
 
+    public string AccountName => Current?.AccountName ?? "";
+    public string AvatarUrl => Current?.AvatarUrl ?? "";
+
     /// <summary>
     /// Opens the login window. If the persisted WebView2 profile still holds a
     /// valid Google session the window closes itself without ever becoming
     /// visible; otherwise the user signs in interactively.
     /// </summary>
-    public bool SignIn(Window? owner)
+    public bool SignIn(Window? owner) => ShowLogin(owner, switchAccount: false);
+
+    /// <summary>Opens the Google account chooser so the user can switch to another account (§4).</summary>
+    public bool SwitchAccount(Window? owner) => ShowLogin(owner, switchAccount: true);
+
+    private bool ShowLogin(Window? owner, bool switchAccount)
     {
-        var window = new LoginWindow();
+        var window = new LoginWindow { SwitchAccount = switchAccount };
         if (owner is { IsVisible: true })
         {
             window.Owner = owner;
@@ -48,7 +56,8 @@ public sealed class AuthService : ISessionProvider
         if (result == true && window.Session is not null)
         {
             Current = window.Session;
-            _logger.LogInformation("Signed in (authUser={AuthUser})", Current.AuthUser);
+            _logger.LogInformation("Signed in (authUser={AuthUser}, name='{Name}')",
+                Current.AuthUser, Current.AccountName);
             SessionChanged?.Invoke(this, EventArgs.Empty);
             return true;
         }

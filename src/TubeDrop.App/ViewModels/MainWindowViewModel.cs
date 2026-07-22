@@ -21,6 +21,10 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty] private bool _sessionExpiredBannerOpen;
     [ObservableProperty] private bool _updateBannerOpen;
     [ObservableProperty] private string _updateVersion = "";
+    [ObservableProperty] private string _accountName = "";
+    [ObservableProperty] private string _avatarUrl = "";
+    [ObservableProperty] private string _accountInitial = "?";
+    [ObservableProperty] private bool _hasAvatar;
 
     public HomeViewModel Home { get; }
     public QueueViewModel Queue { get; }
@@ -50,8 +54,9 @@ public partial class MainWindowViewModel : ObservableObject
         _logger = logger;
         _currentViewModel = home;
 
-        _authService.SessionChanged += (_, _) => IsSignedIn = _authService.IsSignedIn;
+        _authService.SessionChanged += (_, _) => RefreshAccount();
         _authService.SessionExpired += (_, _) => SessionExpiredBannerOpen = true;
+        RefreshAccount();
         _updateService.UpdateAvailable += (_, version) =>
         {
             UpdateVersion = version;
@@ -93,7 +98,32 @@ public partial class MainWindowViewModel : ObservableObject
     {
         SessionExpiredBannerOpen = false;
         _authService.SignIn(Application.Current.MainWindow);
+        RefreshAccount();
+    }
+
+    [RelayCommand]
+    private void SwitchAccount()
+    {
+        _authService.SwitchAccount(Application.Current.MainWindow);
+        RefreshAccount();
+    }
+
+    [RelayCommand]
+    private void SignOut()
+    {
+        _authService.SignOut();
+        RefreshAccount();
+    }
+
+    private void RefreshAccount()
+    {
         IsSignedIn = _authService.IsSignedIn;
+        AccountName = _authService.AccountName;
+        AvatarUrl = _authService.AvatarUrl;
+        HasAvatar = !string.IsNullOrEmpty(AvatarUrl);
+        AccountInitial = AccountName.Length > 0
+            ? AccountName[..1].ToUpperInvariant()
+            : "♪";
     }
 
     private async Task RunBatchAsync(StartBatchRequest request)

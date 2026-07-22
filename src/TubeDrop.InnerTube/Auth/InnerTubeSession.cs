@@ -31,6 +31,15 @@ public sealed record InnerTubeSession
 
     /// <summary>X-Goog-AuthUser index (multi-account sessions).</summary>
     public string AuthUser { get; init; } = "0";
+
+    /// <summary>Signed-in account display name, best-effort from the login page (may be empty).</summary>
+    public string AccountName { get; init; } = "";
+
+    /// <summary>Signed-in account email/handle, best-effort (may be empty).</summary>
+    public string AccountEmail { get; init; } = "";
+
+    /// <summary>Account avatar URL, best-effort from the login page (may be empty → UI shows initials).</summary>
+    public string AvatarUrl { get; init; } = "";
 }
 
 /// <summary>Provides the current session to InnerTube clients; raised when it changes.</summary>
